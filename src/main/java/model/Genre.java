@@ -4,7 +4,6 @@ package model;
 public class Genre {
     private int genreId;
     private String name;
-
     public Genre() {
     }
 

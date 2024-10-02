@@ -7,20 +7,20 @@ public class Seat {
     private int col;
     private int row;
     private String type;
-    private int roomId;
+    private Room room;
 
     // Default constructor
     public Seat() {
     }
 
     // Parameterized constructor
-    public Seat(int seatId, String seatNum, int col, int row, String type, int roomId) {
+    public Seat(int seatId, String seatNum, int col, int row, String type, Room room) {
         this.seatId = seatId;
         this.seatNum = seatNum;
         this.col = col;
         this.row = row;
         this.type = type;
-        this.roomId = roomId;
+        this.room = room;
     }
 
     // Getters and Setters
@@ -60,16 +60,23 @@ public class Seat {
         this.type = type;
     }
 
-    public int getRoomId() {
-        return roomId;
+    public Room getRoom() {
+        return room;
     }
 
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public void setRoom(Room room) {
+        this.room = room;
     }
 
     @Override
     public String toString() {
-        return "Seat{" + "seatId=" + seatId + ", seatNum=" + seatNum + ", col=" + col + ", row=" + row + ", type=" + type + ", roomId=" + roomId + '}';
+        return "Seat{" +
+                "col=" + col +
+                ", seatId=" + seatId +
+                ", seatNum='" + seatNum + '\'' +
+                ", row=" + row +
+                ", type='" + type + '\'' +
+                ", room=" + room +
+                '}';
     }
 }

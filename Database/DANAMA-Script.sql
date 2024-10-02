@@ -31,7 +31,8 @@ CREATE TABLE Movie (
     director NVARCHAR(255),
     agerestricted INT,
     actors TEXT,
-    duration INT
+    duration INT,
+    status INT
 );
 
 --Create MovieGenre table
@@ -97,18 +98,10 @@ CREATE TABLE Showtime (
     movieId INT,
     roomId INT,
 	seatAvailable INT,
+    status INT,
     FOREIGN KEY (movieId) REFERENCES Movie(movieId),
     FOREIGN KEY (roomId) REFERENCES Room(roomId)
 )
--- Create SeatAvailability Table
-CREATE TABLE SeatAvailability (
-    seatId INT,
-    showtimeId INT,
-    isAvailability bit NOT NULL,
-    PRIMARY KEY (seatId, showtimeId),
-    FOREIGN KEY (seatId) REFERENCES Seat(seatId),
-    FOREIGN KEY (showtimeId) REFERENCES Showtime(showtimeId)
-);
 
 -- Create Booking Table
 CREATE TABLE Booking (
@@ -116,6 +109,7 @@ CREATE TABLE Booking (
     totalcost DECIMAL(10, 2),
     [timestamp] DATETIME,
     [UID] INT,
+    status INT,
     FOREIGN KEY ([UID]) REFERENCES Account([UID])
 );
 

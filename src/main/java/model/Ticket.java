@@ -7,24 +7,24 @@ public class Ticket {
     private String name;
     private String email;
     private String phone;
-    private int bookingId;
-    private int showtimeId;
-    private int seatId;
+    private Booking booking;
+    private Showtime showtime;
+    private Seat seat;
 
     // Default constructor
     public Ticket() {
     }
 
     // Parameterized constructor
-    public Ticket(int ticketId, double price, String name, String email, String phone, int bookingId, int showtimeId, int seatId) {
+    public Ticket(int ticketId, double price, String name, String email, String phone, Booking booking, Showtime showtime, Seat seat) {
         this.ticketId = ticketId;
         this.price = price;
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.bookingId = bookingId;
-        this.showtimeId = showtimeId;
-        this.seatId = seatId;
+        this.booking = booking;
+        this.showtime = showtime;
+        this.seat = seat;
     }
 
     // Getters and Setters
@@ -64,42 +64,41 @@ public class Ticket {
         this.phone = phone;
     }
 
-    public int getBookingId() {
-        return bookingId;
+    public Showtime getShowtime() {
+        return showtime;
     }
 
-    public void setBookingId(int bookingId) {
-        this.bookingId = bookingId;
+    public void setShowtime(Showtime showtime) {
+        this.showtime = showtime;
     }
 
-    public int getShowtimeId() {
-        return showtimeId;
+    public Seat getSeat() {
+        return seat;
     }
 
-    public void setShowtimeId(int showtimeId) {
-        this.showtimeId = showtimeId;
+    public void setSeat(Seat seat) {
+        this.seat = seat;
     }
 
-    public int getSeatId() {
-        return seatId;
+    public Booking getBooking() {
+        return booking;
     }
 
-    public void setSeatId(int seatId) {
-        this.seatId = seatId;
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 
-    // toString method
     @Override
     public String toString() {
         return "Ticket{" +
-                "ticketId=" + ticketId +
+                "booking=" + booking +
+                ", ticketId=" + ticketId +
                 ", price=" + price +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
-                ", bookingId=" + bookingId +
-                ", showtimeId=" + showtimeId +
-                ", seatId=" + seatId +
+                ", showtime=" + showtime +
+                ", seat=" + seat +
                 '}';
     }
 }

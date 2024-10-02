@@ -10,24 +10,26 @@ public class Showtime {
     private Time startTime;
     private Time endTime;
     private double basePrice;
-    private int movieId;
-    private int roomId;
+    private Movie movie;
+    private Room room;
     private int seatAvailable;
+    private int status;
 
     // Default constructor
     public Showtime() {
     }
 
     // Parameterized constructor
-    public Showtime(int showtimeId, Date showDate, Time startTime, Time endTime, double basePrice, int movieId, int roomId, int seatAvailable) {
+    public Showtime(int showtimeId, Date showDate, Time startTime, Time endTime, double basePrice, Movie movie, Room room, int seatAvailable, int status) {
         this.showtimeId = showtimeId;
         this.showDate = showDate;
         this.startTime = startTime;
         this.endTime = endTime;
         this.basePrice = basePrice;
-        this.movieId = movieId;
-        this.roomId = roomId;
+        this.movie = movie;
+        this.room = room;
         this.seatAvailable = seatAvailable;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -67,20 +69,20 @@ public class Showtime {
         this.basePrice = basePrice;
     }
 
-    public int getMovieId() {
-        return movieId;
+    public Room getRoom() {
+        return room;
     }
 
-    public void setMovieId(int movieId) {
-        this.movieId = movieId;
+    public void setRoom(Room room) {
+        this.room = room;
     }
 
-    public int getRoomId() {
-        return roomId;
+    public Movie getMovie() {
+        return movie;
     }
 
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public void setMovie(Movie movie) {
+        this.movie = movie;
     }
 
     public int getSeatAvailable() {
@@ -91,9 +93,27 @@ public class Showtime {
         this.seatAvailable = seatAvailable;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
-        return "Showtime{" + "showtimeId=" + showtimeId + ", showDate=" + showDate + ", startTime=" + startTime + ", endTime=" + endTime + ", basePrice=" + basePrice + ", movieId=" + movieId + ", roomId=" + roomId + ", seatAvailable=" + seatAvailable + '}';
+        return "Showtime{" +
+                "basePrice=" + basePrice +
+                ", showtimeId=" + showtimeId +
+                ", showDate=" + showDate +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", movie=" + movie +
+                ", room=" + room +
+                ", seatAvailable=" + seatAvailable +
+                ", status=" + status +
+                '}';
     }
 
 }

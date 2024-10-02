@@ -4,18 +4,18 @@ public class Room {
     private int roomId;
     private String name;
     private int numberOfSeat;
-    private int cinemaId;
+    private Cinema cinema;
 
     // Default constructor
     public Room() {
     }
 
     // Parameterized constructor
-    public Room(int roomId, String name, int numberOfSeat, int cinemaId) {
+    public Room(int roomId, String name, int numberOfSeat, Cinema cinema) {
         this.roomId = roomId;
         this.name = name;
         this.numberOfSeat = numberOfSeat;
-        this.cinemaId = cinemaId;
+        this.cinema = cinema;
     }
 
     // Getters and Setters
@@ -39,16 +39,21 @@ public class Room {
         this.numberOfSeat = numberOfSeat;
     }
 
-    public int getCinemaId() {
-        return cinemaId;
+    public Cinema getCinema() {
+        return cinema;
     }
 
-    public void setCinemaId(int cinemaId) {
-        this.cinemaId = cinemaId;
+    public void setCinema(Cinema cinema) {
+        this.cinema = cinema;
     }
 
     @Override
     public String toString() {
-        return "Room{" + "roomId=" + roomId + ", name=" + name + ", numberOfSeat=" + numberOfSeat + ", cinemaId=" + cinemaId + '}';
+        return "Room{" +
+                "cinema=" + cinema +
+                ", roomId=" + roomId +
+                ", name='" + name + '\'' +
+                ", numberOfSeat=" + numberOfSeat +
+                '}';
     }
 }

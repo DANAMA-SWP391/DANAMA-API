@@ -6,18 +6,19 @@ public class Booking {
     private int bookingId;
     private double totalCost;
     private Date timestamp;
-    private int UID;
-
+    private Account user;
+    private int status;
     // Default constructor
     public Booking() {
     }
 
     // Parameterized constructor
-    public Booking(int bookingId, double totalCost, Date timestamp, int UID) {
+    public Booking(int bookingId, double totalCost, Date timestamp, Account user, int status) {
         this.bookingId = bookingId;
         this.totalCost = totalCost;
         this.timestamp = timestamp;
-        this.UID = UID;
+        this.user = user;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -41,16 +42,30 @@ public class Booking {
         this.timestamp = timestamp;
     }
 
-    public int getUID() {
-        return UID;
+    public Account getUser() {
+        return user;
     }
 
-    public void setUID(int UID) {
-        this.UID = UID;
+    public void setUser(Account user) {
+        this.user = user;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     @Override
     public String toString() {
-        return "Booking{" + "bookingId=" + bookingId + ", totalCost=" + totalCost + ", timestamp=" + timestamp + ", UID=" + UID + '}';
+        return "Booking{" +
+                "bookingId=" + bookingId +
+                ", totalCost=" + totalCost +
+                ", timestamp=" + timestamp +
+                ", userId=" + user.getUID() +
+                ", status=" + status +
+                '}';
     }
 }

@@ -5,6 +5,7 @@
 package model;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -23,11 +24,12 @@ public class Movie {
     private int ageRestricted;
     private String actors;
     private int duration;
-
+    private int status;
+    private List<Genre> genres;
     public Movie() {
     }
 
-    public Movie(int movieId, String name, String description, String poster, String trailer, Date releaseDate, String country, String director, int ageRestricted, String actors, int duration) {
+    public Movie(int movieId, String name, String description, String poster, String trailer, Date releaseDate, String country, String director, int ageRestricted, String actors, int duration, int status, List<Genre> genres) {
         this.movieId = movieId;
         this.name = name;
         this.description = description;
@@ -39,6 +41,8 @@ public class Movie {
         this.ageRestricted = ageRestricted;
         this.actors = actors;
         this.duration = duration;
+        this.status = status;
+        this.genres = genres;
     }
 
     public int getMovieId() {
@@ -125,9 +129,38 @@ public class Movie {
         this.duration = duration;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
+    }
+
     @Override
     public String toString() {
-        return "Movie{" + "movieId=" + movieId + ", name=" + name + ", description=" + description + ", poster=" + poster + ", trailer=" + trailer + ", releaseDate=" + releaseDate + ", country=" + country + ", director=" + director + ", ageRestricted=" + ageRestricted + ", actors=" + actors + ", duration=" + duration + '}';
+        return "Movie{" +
+                "actors='" + actors + '\'' +
+                ", movieId=" + movieId +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", poster='" + poster + '\'' +
+                ", trailer='" + trailer + '\'' +
+                ", releaseDate=" + releaseDate +
+                ", country='" + country + '\'' +
+                ", director='" + director + '\'' +
+                ", ageRestricted=" + ageRestricted +
+                ", duration=" + duration +
+                ", status=" + status +
+                ", genres=" + genres +
+                '}';
     }
-    
 }
