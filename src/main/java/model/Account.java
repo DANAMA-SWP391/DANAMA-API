@@ -4,10 +4,6 @@
  */
 package model;
 
-/**
- *
- * @author Techcare
- */
 public class Account {
 
     private int UID;
