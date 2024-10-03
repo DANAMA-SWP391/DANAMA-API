@@ -58,11 +58,11 @@ public class RoomDAO extends DBContext{
 
     public static void main(String[] args) {
         RoomDAO dao = new RoomDAO();
-//        Cinema cinema = new Cinema(1, "CGV Saigon", "cgv_logo.png", "72 Lê Thánh Tôn, Q.1, HCM",
-//                "CGV Cinema nổi tiếng", "cgv_image.png", 101);
-//        Room room = new Room("Screen 4", 30 , cinema);
-//        dao.addNewRoom(room);
-        dao.deleteRoom(7);
+        Cinema cinema = new Cinema(1, "CGV Saigon", "cgv_logo.png", "72 Lê Thánh Tôn, Q.1, HCM",
+                "CGV Cinema nổi tiếng", "cgv_image.png", 101);
+        Room room = new Room("Screen 4", 30 , cinema);
+        dao.addNewRoom(room);
+//        dao.deleteRoom(7);
     }
 }
 
