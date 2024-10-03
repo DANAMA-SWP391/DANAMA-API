@@ -10,14 +10,9 @@ public class DBContext {
 
     public DBContext() {
         try {
-//            String url = "jdbc:sqlserver://danama.database.windows.net:1433;database=DANAMA;user=dangchau@danama;password=Tungdang1411;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
-//            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-//            connection = DriverManager.getConnection(url);
-            String url = "jdbc:sqlserver://ADMIN;databaseName=DANAMA;encrypt=false;trustServerCertificate=false;loginTimeout=30;";
-            String username = "sa";
-            String password = "123";
+            String url = "jdbc:sqlserver://danama.database.windows.net:1433;database=DANAMA;user=dang@danama;password=Tung1411;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            connection = DriverManager.getConnection(url, username, password);
+            connection = DriverManager.getConnection(url);
         } catch (ClassNotFoundException | SQLException ex) {
             System.out.println(ex);
         }
