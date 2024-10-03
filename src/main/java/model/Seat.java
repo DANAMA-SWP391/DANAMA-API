@@ -23,6 +23,14 @@ public class Seat {
         this.room = room;
     }
 
+    public Seat(String seatNum, int col, int row, String type, Room room) {
+        this.seatNum = seatNum;
+        this.col = col;
+        this.row = row;
+        this.type = type;
+        this.room = room;
+    }
+
     // Getters and Setters
     public int getSeatId() {
         return seatId;
