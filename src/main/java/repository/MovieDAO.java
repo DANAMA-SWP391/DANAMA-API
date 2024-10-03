@@ -114,10 +114,53 @@ public class MovieDAO extends DBContext {
 
         return comingSoonMovies;
     }
+    public List<Movie> getAllMovieList() {
+        List<Movie> allMovies = new ArrayList<>();
+        String sql = "SELECT * FROM Movie";
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            // Using the connection from DBContext
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int movieId = resultSet.getInt("movieId");
+                String name = resultSet.getString("name");
+                String description = resultSet.getString("description");
+                String poster = resultSet.getString("poster");
+                String trailer = resultSet.getString("trailer");
+                Date releaseDate = resultSet.getDate("releasedate");
+                String country = resultSet.getString("country");
+                String director = resultSet.getString("director");
+                int ageRestricted = resultSet.getInt("agerestricted");
+                String actors = resultSet.getString("actors");
+                int duration = resultSet.getInt("duration");
+                int status = resultSet.getInt("status");
 
+                // Get genres using GenreDAO
+                List<Genre> genres = genreDAO.getGenresByMovieId(movieId);
+
+                // Create a new Movie object and add it to the list
+                Movie movie = new Movie(movieId, name, description, poster, trailer, releaseDate, country, director, ageRestricted, actors, duration, status, genres);
+                allMovies.add(movie);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (statement != null) statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return allMovies;
+    }
+    // Test method
     public static void main(String[] args) {
         MovieDAO movieDAO = new MovieDAO();
-        System.out.println(movieDAO.getNowPlayingMovies());
-        System.out.println(movieDAO.getComingSoonMovies());
+//        System.out.println(movieDAO.getNowPlayingMovies());
+//        System.out.println(movieDAO.getComingSoonMovies());
+        System.out.println(movieDAO.getAllMovieList());
     }
 }
