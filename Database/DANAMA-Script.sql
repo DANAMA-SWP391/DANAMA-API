@@ -1,6 +1,6 @@
 create database DANAMA
 go
-use  DANAMA
+use DANAMA
 go
 -- Create User Table
 CREATE TABLE Account (
@@ -61,7 +61,7 @@ CREATE TABLE Cinema (
     cinemaId INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(255) NOT NULL,
     logo VARCHAR(255),
-    [address[ TEXT,
+    [address] TEXT,
     [description] TEXT,
     [image] VARCHAR(255),
 	managerId int,
