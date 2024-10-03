@@ -18,6 +18,12 @@ public class Room {
         this.cinema = cinema;
     }
 
+    public Room(String name, int numberOfSeat, Cinema cinema) {
+        this.name = name;
+        this.numberOfSeat = numberOfSeat;
+        this.cinema = cinema;
+    }
+
     // Getters and Setters
     public int getRoomId() {
         return roomId;
