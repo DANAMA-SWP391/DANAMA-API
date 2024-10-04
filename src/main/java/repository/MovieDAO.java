@@ -156,6 +156,13 @@ public class MovieDAO extends DBContext {
         }
         return allMovies;
     }
+    public Movie getMovieById(int movieId) {
+        List<Movie> list= getAllMovieList();
+        for(Movie movie: list) {
+            if(movie.getMovieId()==movieId) return movie;
+        }
+        return null;
+    }
     // Test method
     public static void main(String[] args) {
         MovieDAO movieDAO = new MovieDAO();

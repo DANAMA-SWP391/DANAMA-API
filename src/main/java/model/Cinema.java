@@ -34,6 +34,10 @@ public class Cinema {
         return cinemaId;
     }
 
+    public void setCinemaId(int cinemaId) {
+        this.cinemaId = cinemaId;
+    }
+
     public String getName() {
         return name;
     }

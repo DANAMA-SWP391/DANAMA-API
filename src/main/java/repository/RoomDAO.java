@@ -1,6 +1,9 @@
 package repository;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
 import model.Room;
 import model.Cinema;
 
@@ -11,8 +14,36 @@ import context.DBContext;
 
 public class RoomDAO extends DBContext{
 
+    public ArrayList<Room> getListRoom() {
+        ArrayList<Room> rooms = new ArrayList<>();
 
-        // Method to add a new Room using Room object
+        String sql = "SELECT roomId, name, numberOfSeat, cinemaId FROM Room";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Room room = new Room();
+                room.setRoomId(resultSet.getInt("roomId"));
+                room.setName(resultSet.getString("name"));
+                room.setNumberOfSeat(resultSet.getInt("numberOfSeat"));
+                CinemaDAO cinemaDAO = new CinemaDAO();
+                Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
+                room.setCinema(cinema);
+                rooms.add(room);
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rooms;
+    }
+
+    // Method to add a new Room using Room object
         public void addNewRoom(Room room) {
             String sql = "INSERT INTO Room ([name], numberOfSeat, cinemaId) VALUES (?, ?, ?)";
 
@@ -55,14 +86,49 @@ public class RoomDAO extends DBContext{
             System.out.println("Error when deleting room: " + e.getMessage());
         }
     }
+    public Room getRoomByShowtime(int showtimeId) {
+        Room room = null;
+
+        String sql = "SELECT Room.roomId, Room.name, Room.numberOfSeat, Room.cinemaId " +
+                "FROM Room " +
+                "JOIN Showtime ON Room.roomId = Showtime.roomId " +
+                "WHERE Showtime.showtimeId = ?";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, showtimeId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                room = new Room();
+                room.setRoomId(resultSet.getInt("roomId"));
+                room.setName(resultSet.getString("name"));
+                room.setNumberOfSeat(resultSet.getInt("numberOfSeat"));
+
+                // Fetch the Cinema details using the cinemaId
+                CinemaDAO cinemaDAO = new CinemaDAO();
+                Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
+                room.setCinema(cinema);
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return room;
+    }
+
 
     public static void main(String[] args) {
         RoomDAO dao = new RoomDAO();
-        Cinema cinema = new Cinema(1, "CGV Saigon", "cgv_logo.png", "72 Lê Thánh Tôn, Q.1, HCM",
-                "CGV Cinema nổi tiếng", "cgv_image.png", 101);
-        Room room = new Room("Screen 4", 30 , cinema);
-        dao.addNewRoom(room);
+//        Cinema cinema = new Cinema(1, "CGV Saigon", "cgv_logo.png", "72 Lê Thánh Tôn, Q.1, HCM",
+//                "CGV Cinema nổi tiếng", "cgv_image.png", 101);
+//        Room room = new Room("Screen 4", 30 , cinema);
+//        dao.addNewRoom(room);
 //        dao.deleteRoom(7);
+        System.out.println(dao.getRoomByShowtime(1));
     }
 }
 
