@@ -10,7 +10,7 @@ public class DBContext {
 
     public DBContext() {
         try {
-            String url = "jdbc:sqlserver://danama.database.windows.net:1433;database=DANAMA;user=dangchau@danama;password=Tungdang1411;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+            String url = "jdbc:sqlserver://danama.database.windows.net:1433;database=DANAMA;user=dang@danama;password=Tung1411;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(url);
         } catch (ClassNotFoundException | SQLException ex) {
