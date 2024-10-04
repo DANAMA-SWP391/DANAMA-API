@@ -21,7 +21,7 @@
       </schema-mapping>
     </data-source>
     <data-source name="DANAMA" uuid="7a48a95b-836e-4ad2-9238-58812bcfc862">
-      <database-info product="Microsoft SQL Server" version="12.00.5624" jdbc-version="4.2" driver-name="Microsoft JDBC Driver 12.2 for SQL Server" driver-version="12.2.0.0" dbms="AZURE" exact-version="12.0.5624" exact-driver-version="12.2">
+      <database-info product="Microsoft SQL Server" version="12.00.5688" jdbc-version="4.2" driver-name="Microsoft JDBC Driver 12.2 for SQL Server" driver-version="12.2.0.0" dbms="AZURE" exact-version="12.0.5688" exact-driver-version="12.2">
         <extra-name-characters>$#@</extra-name-characters>
         <identifier-quote-string>&quot;</identifier-quote-string>
       </database-info>
