@@ -89,6 +89,10 @@ public class Movie {
         return duration;
     }
 
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

@@ -86,17 +86,14 @@ public class RoomDAO extends DBContext{
             System.out.println("Error when deleting room: " + e.getMessage());
         }
     }
-    public Room getRoomByShowtime(int showtimeId) {
+    public Room getRoomById(int roomId) {
         Room room = null;
 
-        String sql = "SELECT Room.roomId, Room.name, Room.numberOfSeat, Room.cinemaId " +
-                "FROM Room " +
-                "JOIN Showtime ON Room.roomId = Showtime.roomId " +
-                "WHERE Showtime.showtimeId = ?";
+        String sql = "SELECT roomId, name, numberOfSeat, cinemaId FROM Room WHERE roomId=? ";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, showtimeId);
+            preparedStatement.setInt(1, roomId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -128,7 +125,7 @@ public class RoomDAO extends DBContext{
 //        Room room = new Room("Screen 4", 30 , cinema);
 //        dao.addNewRoom(room);
 //        dao.deleteRoom(7);
-        System.out.println(dao.getRoomByShowtime(1));
+        System.out.println(dao.getRoomById(1));
     }
 }
 
