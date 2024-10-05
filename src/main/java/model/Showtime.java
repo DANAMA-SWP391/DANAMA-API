@@ -37,6 +37,10 @@ public class Showtime {
         return showtimeId;
     }
 
+    public void setShowtimeId(int showtimeId) {
+        this.showtimeId = showtimeId;
+    }
+
     public Date getShowDate() {
         return showDate;
     }
