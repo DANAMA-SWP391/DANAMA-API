@@ -44,7 +44,7 @@ public class RoomDAO extends DBContext{
     }
 
     // Method to add a new Room using Room object
-        public void addNewRoom(Room room) {
+        public boolean addNewRoom(Room room) {
             String sql = "INSERT INTO Room ([name], numberOfSeat, cinemaId) VALUES (?, ?, ?)";
 
             try {
@@ -59,14 +59,16 @@ public class RoomDAO extends DBContext{
                 // Thực thi câu lệnh SQL để thêm phòng mới
                 ps.executeUpdate();
                 System.out.println("New room added successfully!");
+                return true;
 
             } catch (SQLException e) {
                 // Xử lý ngoại lệ SQL
                 System.out.println("Error when adding new room: " + e.getMessage());
+                return false;
             }
         }
 
-    public void deleteRoom(int roomId) {
+    public boolean deleteRoom(int roomId) {
         String sql = "DELETE FROM Room WHERE roomId = ?";
 
         try {
@@ -76,14 +78,15 @@ public class RoomDAO extends DBContext{
             int rowsAffected = ps.executeUpdate(); // Thực hiện xóa
 
             if (rowsAffected > 0) {
-                System.out.println("Room deleted successfully!");
+                return true;
             } else {
-                System.out.println("Room not found.");
+                return false;
             }
 
         } catch (SQLException e) {
             // Xử lý ngoại lệ SQL
             System.out.println("Error when deleting room: " + e.getMessage());
+            return false;
         }
     }
     public Room getRoomById(int roomId) {
@@ -115,6 +118,9 @@ public class RoomDAO extends DBContext{
         }
 
         return room;
+    }
+    public boolean updateRoom(int roomId, Room room) {
+        return false;
     }
 
     public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
