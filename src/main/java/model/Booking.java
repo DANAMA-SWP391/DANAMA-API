@@ -26,6 +26,7 @@ public class Booking {
         return bookingId;
     }
 
+
     public double getTotalCost() {
         return totalCost;
     }

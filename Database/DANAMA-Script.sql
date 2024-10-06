@@ -127,3 +127,5 @@ CREATE TABLE Ticket (
 	FOREIGN KEY (showtimeId) REFERENCES Showtime(showtimeId),
 	FOREIGN KEY (seatId) REFERENCES Seat(seatId)
 );
+
+

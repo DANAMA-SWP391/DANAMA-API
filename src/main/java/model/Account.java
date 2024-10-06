@@ -15,6 +15,9 @@ public class Account {
     private int roleId;
     private String password;
 
+    public Account() {
+    }
+
     public Account(int UID, String name, String email, String phone, String avatar, String googleId, int roleId, String password) {
         this.UID = UID;
         this.name = name;
