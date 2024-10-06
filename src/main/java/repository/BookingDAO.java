@@ -1,17 +1,15 @@
 
 package repository;
 
-import model.Showtime;
-import model.Room;
-import model.Account;
-import model.Cinema;
+import context.DBContext;
+import model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-public class BookingDAO extends DBContext{
+public class BookingDAO extends DBContext {
     public Booking getBookingById (int bookingId) {
         return null;
     }
