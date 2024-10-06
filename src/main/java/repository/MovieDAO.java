@@ -7,6 +7,7 @@ package repository;
 import context.DBContext;
 import model.Genre;
 import model.Movie;
+import java.text.SimpleDateFormat;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -196,13 +197,82 @@ public class MovieDAO extends DBContext {
         return movie;
     }
 
+    public boolean addMovie(Movie movie) {
+        String sql = "INSERT INTO Movie (name, description, poster, trailer, releasedate, country, director, agerestricted, actors, duration, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement ps = null;
+
+        try {
+            // Chuẩn bị câu lệnh SQL với PreparedStatement
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, movie.getName());
+            ps.setString(2, movie.getDescription());
+            ps.setString(3, movie.getPoster());
+            ps.setString(4, movie.getTrailer());
+
+            // Sử dụng java.sql.Date đúng cách
+            ps.setDate(5, new java.sql.Date(movie.getReleaseDate().getTime())); // Chuyển đổi
+            ps.setString(6, movie.getCountry());
+            ps.setString(7, movie.getDirector());
+            ps.setInt(8, movie.getAgeRestricted());
+            ps.setString(9, movie.getActors());
+            ps.setInt(10, movie.getDuration());
+            ps.setInt(11, movie.getStatus());
+
+            // Thực thi câu lệnh và kiểm tra số dòng bị ảnh hưởng
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0; // Trả về true nếu thêm thành công
+
+        } catch (SQLException e) {
+            e.printStackTrace(); // In ra lỗi nếu xảy ra ngoại lệ
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close(); // Đóng PreparedStatement
+            } catch (SQLException e) {
+                e.printStackTrace(); // Xử lý lỗi nếu xảy ra khi đóng PreparedStatement
+            }
+        }
+    }
+
+    public boolean updateMovieByID(int movieId, Movie movie) {
+        String sql = "UPDATE Movie SET name = ?, description = ?, poster = ?, trailer = ?, releasedate = ?, country = ?, director = ?, agerestricted = ?, actors = ?, duration = ?, status = ? WHERE movieId = ?";
+
+        PreparedStatement ps = null;
+
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, movie.getName());
+            ps.setString(2, movie.getDescription());
+            ps.setString(3, movie.getPoster());
+            ps.setString(4, movie.getTrailer());
+            ps.setDate(5, new java.sql.Date(movie.getReleaseDate().getTime())); // Chuyển đổi Date
+            ps.setString(6, movie.getCountry());
+            ps.setString(7, movie.getDirector());
+            ps.setInt(8, movie.getAgeRestricted());
+            ps.setString(9, movie.getActors());
+            ps.setInt(10, movie.getDuration());
+            ps.setInt(11, movie.getStatus());
+            ps.setInt(12, movieId); // ID của movie để cập nhật
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0; // Trả về true nếu cập nhật thành công
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     // Test method
     public static void main(String[] args) {
-        MovieDAO movieDAO = new MovieDAO();
-//        System.out.println(movieDAO.getNowPlayingMovies());
-//        System.out.println(movieDAO.getComingSoonMovies());
-//        System.out.println(movieDAO.getAllMovieList());
-        System.out.println(movieDAO.getMovieById(1));
+
     }
 }
