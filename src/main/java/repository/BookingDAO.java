@@ -18,6 +18,7 @@ public class BookingDAO extends DBContext {
         return null;
     }
     public ArrayList<Booking> getListBookingByCinema(int cinemaId) {
+        
         return null;
     }
     public boolean addBooking(Booking booking) {
