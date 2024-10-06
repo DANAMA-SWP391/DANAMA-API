@@ -3,6 +3,7 @@ package repository;
 import context.DBContext;
 import model.Room;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -81,7 +82,33 @@ import model.Cinema;
         }
 
         public ArrayList<Seat> getListSeatsInRoom(int roomId) {
-            return null;
+            ArrayList<Seat> seats = new ArrayList<>();
+            String sql = "SELECT seatId, seatNum, col, [row], [type], roomId FROM Seat WHERE roomId = ?";
+
+            try {
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ps.setInt(1, roomId);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    int seatId = rs.getInt("seatId");
+                    String seatNum = rs.getString("seatNum");
+                    int col = rs.getInt("col");
+                    int row = rs.getInt("row");
+                    String type = rs.getString("type");
+
+                    // Assuming Room object creation is needed
+                    Room room = new Room();
+                    room.setRoomId(rs.getInt("roomId"));
+
+                    Seat seat = new Seat(seatId, seatNum, col, row, type, room);
+                    seats.add(seat);
+                }
+                System.out.println("Seats retrieved successfully!");
+            } catch (SQLException e) {
+                System.out.println("Error when fetching seats: " + e.getMessage());
+            }
+            return seats;
         }
 
         public static void main(String[] args) {
@@ -93,8 +120,14 @@ import model.Cinema;
 //
 //            seatDAO.addSeat(seat);
 //            seatDAO.deleteSeat(6);
-            seatDAO.changeSeatTypeByID(2,"VIP");
+//            seatDAO.changeSeatTypeByID(2,"VIP");
 
+            ArrayList<Seat> seats = seatDAO.getListSeatsInRoom(1);
+
+            for (Seat seat : seats) {
+                System.out.println(seat);
+            }
+            seatDAO.getListSeatsInRoom(1);
         }
 
 

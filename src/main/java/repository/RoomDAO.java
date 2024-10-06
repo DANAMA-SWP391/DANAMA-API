@@ -44,7 +44,7 @@ public class RoomDAO extends DBContext{
     }
 
     // Method to add a new Room using Room object
-        public boolean addNewRoom(Room room) {
+    public boolean addNewRoom(Room room) {
             String sql = "INSERT INTO Room ([name], numberOfSeat, cinemaId) VALUES (?, ?, ?)";
 
             try {
@@ -119,8 +119,22 @@ public class RoomDAO extends DBContext{
 
         return room;
     }
+
     public boolean updateRoom(int roomId, Room room) {
-        return false;
+        String sql = "UPDATE Room SET name = ?, numberOfSeat = ?, cinemaId = ? WHERE roomId = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, room.getName());
+            ps.setInt(2, room.getNumberOfSeat());
+            ps.setInt(3, room.getCinema().getCinemaId());
+            ps.setInt(4, roomId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Error when updating room: " + e.getMessage());
+            return false;
+        }
     }
 
     public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
