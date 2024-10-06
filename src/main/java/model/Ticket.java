@@ -32,6 +32,10 @@ public class Ticket {
         return ticketId;
     }
 
+    public void setTicketId(int ticketId) {
+        this.ticketId = ticketId;
+    }
+
     public double getPrice() {
         return price;
     }
