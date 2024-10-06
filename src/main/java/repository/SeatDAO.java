@@ -4,13 +4,15 @@ import context.DBContext;
 import model.Room;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
 import model.Seat;
 import model.Cinema;
 
     public class SeatDAO extends DBContext {
 
         // Method to add a new seat to the database
-        public void addSeat(Seat seat) {
+        public boolean addSeat(Seat seat) {
             String sql = "INSERT INTO Seat (seatNum, col, [row], [type], roomId) VALUES (?, ?, ?, ?, ?)";
             try  {
                 PreparedStatement ps = connection.prepareStatement(sql);
@@ -22,13 +24,15 @@ import model.Cinema;
 
                 ps.executeUpdate();
                 System.out.println("New seat added successfully!");
+                return true;
 
             } catch (SQLException e) {
                 System.out.println("Error when adding new seat: " + e.getMessage());
+                return false;
             }
         }
 
-        public void deleteSeat(int seatId) {
+        public boolean deleteSeat(int seatId) {
             String sql = "DELETE FROM Seat WHERE seatId = ?";
 
             try {
@@ -39,17 +43,20 @@ import model.Cinema;
 
                 if (rowsAffected > 0) {
                     System.out.println("Seat deleted successfully!");
+                    return true;
                 } else {
                     System.out.println("Seat not found.");
+                    return false;
                 }
 
             } catch (SQLException e) {
                 // Handle SQL exception
                 System.out.println("Error when deleting seat: " + e.getMessage());
+                return false;
             }
         }
 
-        public void changeSeatTypeByID(int seatId, String newType) {
+        public boolean changeSeatTypeByID(int seatId, String newType) {
             String sql = "UPDATE Seat SET [type] = ? WHERE seatId = ?";
 
             try {
@@ -61,13 +68,20 @@ import model.Cinema;
 
                 if (rowsAffected > 0) {
                     System.out.println("Seat type updated successfully!");
+                    return true;
                 } else {
                     System.out.println("Seat not found.");
+                    return false;
                 }
 
             } catch (SQLException e) {
                 System.out.println("Error when updating seat type: " + e.getMessage());
+                return false;
             }
+        }
+
+        public ArrayList<Seat> getListSeatsInRoom(int roomId) {
+            return null;
         }
 
         public static void main(String[] args) {

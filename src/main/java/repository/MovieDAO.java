@@ -270,7 +270,12 @@ public class MovieDAO extends DBContext {
             }
         }
     }
-
+    public boolean deleteMovie(int movieId) {
+        return true;
+    }
+    public ArrayList<Movie> getTop5MostWatchedMovies() {
+        return null;
+    }
     // Test method
     public static void main(String[] args) {
 

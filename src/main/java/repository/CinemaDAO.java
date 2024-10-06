@@ -133,7 +133,12 @@ public class CinemaDAO extends DBContext {
             }
         }
     }
-
+    public boolean deleteCinema(int cinemaId) {
+        return true;
+    }
+    public double getTotalCinemaRevenue(int cinemaId) {
+        return 0;
+    }
 
     //Testing
     public static void main(String[] args) {

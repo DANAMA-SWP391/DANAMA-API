@@ -41,7 +41,6 @@ public class AccountDAO extends DBContext {
             }
         }
     }
-
     public boolean updateAccountByID(int accountId, Account account) {
         String sql = "UPDATE Account SET name = ?, email = ?, phone = ?, avatar = ?, googleId = ?, roleId = ?, password = ? WHERE UID = ?";
 
@@ -72,7 +71,7 @@ public class AccountDAO extends DBContext {
             }
         }
     }
-    public void updateAccount(int UID, String name, String phone, String avatar, String password) {
+    public boolean updateAccount(int UID, String name, String phone, String avatar, String password) {
         String sql = "UPDATE Account SET name = ?, phone = ?, avatar = ?, password = ? WHERE UID = ?";
         PreparedStatement statement = null;
 
@@ -89,9 +88,10 @@ public class AccountDAO extends DBContext {
 
             // Thực thi câu lệnh
             statement.executeUpdate();
-
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         } finally {
             try {
                 if (statement != null) statement.close();
@@ -100,7 +100,12 @@ public class AccountDAO extends DBContext {
             }
         }
     }
-
+    public boolean banAccount(int UID) {
+        return true;
+    }
+    public boolean deleteAccount(int UID) {
+        return true;
+    }
     public static void main(String[] args) {
         AccountDAO accountDAO = new AccountDAO();
 

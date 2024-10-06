@@ -146,9 +146,23 @@ public class ShowTimeDAO extends DBContext {
 
         return showtimes;
     }
-
+    public boolean updateShowtime(int showtimeId, Showtime showtime) {
+        return false;
+    }
 
     public Showtime getShowtimeByMovie(int movieId) {
+        return null;
+    }
+    public boolean deleteShowtime(int showtimeId) {
+        return false;
+    }
+    public ArrayList<Showtime> getTop5PopularShowtimesInCinema(int cinemaId) {
+        return null;
+    }
+    public String getMostPopularTimeSlotInCinema(int cinemaId) {
+        return null;
+    }
+    public ArrayList<Showtime> get5PopularShowtimeByCinema(int cinemaId) {
         return null;
     }
 
