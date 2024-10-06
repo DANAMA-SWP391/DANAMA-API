@@ -54,6 +54,7 @@ public class ShowTimeDAO extends DBContext {
 
         return showtimes;
     }
+
     public ArrayList<Showtime> getListShowtimesByCinemaID(int cinemaId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
@@ -99,7 +100,6 @@ public class ShowTimeDAO extends DBContext {
 
         return showtimes;
     }
-
 
 
     public ArrayList<Showtime> getListShowtimesByRoom(int roomId) {
@@ -148,14 +148,12 @@ public class ShowTimeDAO extends DBContext {
     }
 
 
-
-
     public Showtime getShowtimeByMovie(int movieId) {
         return null;
     }
 
     public static void main(String[] args) {
-        ShowTimeDAO dao= new ShowTimeDAO();
+        ShowTimeDAO dao = new ShowTimeDAO();
 //        System.out.println(dao.getListShowtimes());
 //        ArrayList<Showtime> showtimes = dao.getListShowtimesByCinemaID(1);
         ArrayList<Showtime> showtimes = dao.getListShowtimesByRoom(1);
@@ -165,5 +163,4 @@ public class ShowTimeDAO extends DBContext {
             System.out.println(showtime.toString() + "\n"); // Thêm xuống dòng giữa mỗi showtime
         }
     }
-
 }
