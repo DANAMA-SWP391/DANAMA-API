@@ -25,6 +25,15 @@ public class Account {
         this.roleId = roleId;
         this.password = password;
     }
+    public Account( String name, String email, String phone, String avatar, String googleId, int roleId, String password) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.avatar = avatar;
+        this.googleId = googleId;
+        this.roleId = roleId;
+        this.password = password;
+    }
 
     public int getUID() {
         return UID;
