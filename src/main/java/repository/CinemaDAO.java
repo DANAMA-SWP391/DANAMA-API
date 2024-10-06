@@ -134,18 +134,62 @@ public class CinemaDAO extends DBContext {
         }
     }
     public boolean deleteCinema(int cinemaId) {
-        return true;
+
+        String sql = "DELETE FROM Cinema WHERE cinemaId = ?";
+        PreparedStatement ps = null;
+
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, cinemaId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
     public double getTotalCinemaRevenue(int cinemaId) {
-        return 0;
+        double totalRevenue = 0.0;
+
+        try {
+            // SQL query to calculate the total revenue from tickets sold for the specified cinema
+            String sql = "SELECT SUM(t.price) AS totalRevenue " +
+                    "FROM Ticket t " +
+                    "JOIN Showtime s ON t.showtimeId = s.showtimeId " +
+                    "WHERE s.roomId IN (SELECT roomId FROM Room WHERE cinemaId = ?)";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, cinemaId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                totalRevenue = resultSet.getDouble("totalRevenue");
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalRevenue;
     }
+
 
     //Testing
     public static void main(String[] args) {
         CinemaDAO cinemaDAO= new CinemaDAO();
-        for(Cinema cinema: cinemaDAO.getListCinemas()) {
-            System.out.println(cinema);
-        }
-        System.out.println(cinemaDAO.getCinemaById(1));
+//        for(Cinema cinema: cinemaDAO.getListCinemas()) {
+//            System.out.println(cinema);
+//        }
+        System.out.println(cinemaDAO.getTotalCinemaRevenue(1));
     }
 }

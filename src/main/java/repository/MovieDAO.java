@@ -271,13 +271,62 @@ public class MovieDAO extends DBContext {
         }
     }
     public boolean deleteMovie(int movieId) {
-        return true;
+
+        // SQL statement to delete a movie from the Movie table based on the movieId
+        String sql = "DELETE FROM Movie WHERE movieId = ?";
+
+        PreparedStatement ps = null;
+
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, movieId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0; // Return true if the movie was successfully deleted
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Return false if an SQLException occurred
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
     public ArrayList<Movie> getTop5MostWatchedMovies() {
-        return null;
+        ArrayList<Movie> topMovies = new ArrayList<>();
+        String sql = "SELECT TOP 5 m.movieId, COUNT(t.ticketId) AS ticketCount " +
+                "FROM Movie m " +
+                "JOIN Showtime s ON m.movieId = s.movieId " +
+                "LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
+                "GROUP BY m.movieId " +
+                "ORDER BY ticketCount DESC";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                int movieId = resultSet.getInt("movieId");
+                // Assuming you have a method getMovieById(int movieId) that returns a Movie object
+                Movie movie = getMovieById(movieId);
+                if (movie != null) {
+                    topMovies.add(movie);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return topMovies;
     }
+
     // Test method
     public static void main(String[] args) {
-
+        MovieDAO movieDAO = new MovieDAO();
+        for(Movie movie : movieDAO.getTop5MostWatchedMovies()) {
+            System.out.println(movie.getName());
+        }
     }
 }
