@@ -3,7 +3,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
+import java.sql.Connection;
 import model.Room;
 import model.Cinema;
 
@@ -117,6 +117,44 @@ public class RoomDAO extends DBContext{
         return room;
     }
 
+    public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
+        ArrayList<Room> rooms = new ArrayList<>();
+        String query = "SELECT r.roomId, r.name, r.numberOfSeat, c.cinemaId, c.name, c.logo, c.address, c.description, c.image, c.managerId " +
+                "FROM Room r " +
+                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
+                "WHERE r.cinemaId = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, cinemaId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                // Fetch Cinema object
+                Cinema cinema = new Cinema(
+                        rs.getInt("cinemaId"),
+                        rs.getString("name"),
+                        rs.getString("logo"),
+                        rs.getString("address"),
+                        rs.getString("description"),
+                        rs.getString("image"),
+                        rs.getInt("managerId")
+                );
+
+                // Fetch Room object
+                Room room = new Room(
+                        rs.getInt("roomId"),
+                        rs.getString("name"),
+                        rs.getInt("numberOfSeat"),
+                        cinema
+                );
+
+                rooms.add(room); // Add Room object to the list
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getListRoomsByCinemaID: " + e.getMessage());
+        }
+        return rooms;
+    }
+
 
     public static void main(String[] args) {
         RoomDAO dao = new RoomDAO();
@@ -125,7 +163,8 @@ public class RoomDAO extends DBContext{
 //        Room room = new Room("Screen 4", 30 , cinema);
 //        dao.addNewRoom(room);
 //        dao.deleteRoom(7);
-        System.out.println(dao.getRoomById(1));
+//        System.out.println(dao.getRoomById(1));
+        System.out.println(dao.getListRoomsByCinemaID(1));
     }
 }
 
