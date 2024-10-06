@@ -27,7 +27,6 @@ import model.Cinema;
                 System.out.println("Error when adding new seat: " + e.getMessage());
             }
         }
-
         public static void main(String[] args) {
             SeatDAO seatDAO = new SeatDAO();
             Cinema cinema = new Cinema(1, "CGV Saigon", "cgv_logo.png", "72 Lê Thánh Tôn, Q.1, HCM",
