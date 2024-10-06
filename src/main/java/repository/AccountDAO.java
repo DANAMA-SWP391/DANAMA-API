@@ -106,23 +106,54 @@ public class AccountDAO extends DBContext {
     public boolean deleteAccount(int UID) {
         return true;
     }
+    public Account getAccountById(int UID) {
+        Account account = null;
+        String sql = "SELECT UID, name, email, phone, avatar, googleId, roleId FROM Account WHERE UID = ?";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, UID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                account = new Account();
+                account.setUID(resultSet.getInt("UID"));
+                account.setName(resultSet.getString("name"));
+                account.setEmail(resultSet.getString("email"));
+                account.setPhone(resultSet.getString("phone"));
+                account.setAvatar(resultSet.getString("avatar"));
+                account.setGoogleId(resultSet.getString("googleId"));
+                account.setRoleId(resultSet.getInt("roleId"));
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return account;
+    }
+
     public static void main(String[] args) {
         AccountDAO accountDAO = new AccountDAO();
-
-        // Tạo đối tượng Account với thông tin mới
-        Account updatedAccount = new Account("New Name", "newemaisl@example.com", "1234256789", "newavat2ar.png", "newGo2ogleId", 2, "newPas2sword");
-
-        // ID của account cần cập nhật
-        int accountIdToUpdate = 4;
-
-        // Cập nhật thông tin
-        boolean result = accountDAO.updateAccountByID(accountIdToUpdate, updatedAccount);
-
-        // Kiểm tra kết quả
-        if (result) {
-            System.out.println("Cập nhật tài khoản thành công.");
-        } else {
-            System.out.println("Cập nhật tài khoản thất bại.");
-        }
+//
+//        // Tạo đối tượng Account với thông tin mới
+//        Account updatedAccount = new Account("New Name", "newemaisl@example.com", "1234256789", "newavat2ar.png", "newGo2ogleId", 2, "newPas2sword");
+//
+//        // ID của account cần cập nhật
+//        int accountIdToUpdate = 4;
+//
+//        // Cập nhật thông tin
+//        boolean result = accountDAO.updateAccountByID(accountIdToUpdate, updatedAccount);
+//
+//        // Kiểm tra kết quả
+//        if (result) {
+//            System.out.println("Cập nhật tài khoản thành công.");
+//        } else {
+//            System.out.println("Cập nhật tài khoản thất bại.");
+//        }
+        Account account = accountDAO.getAccountById(1);
+        System.out.println(account);
     }
 }

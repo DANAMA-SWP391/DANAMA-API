@@ -274,7 +274,7 @@ public class MovieDAO extends DBContext {
         return true;
     }
     public ArrayList<Movie> getTop5MostWatchedMovies() {
-        return null;
+        
     }
     // Test method
     public static void main(String[] args) {
