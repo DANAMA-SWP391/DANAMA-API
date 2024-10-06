@@ -5,6 +5,7 @@ target/
 
 ### IntelliJ IDEA ###
 .idea/
+.idea/dataSources.local.xml
 *.iws
 *.iml
 *.ipr
