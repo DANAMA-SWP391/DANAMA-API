@@ -6,12 +6,10 @@ import model.Movie;
 import model.Room;
 import model.Showtime;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ShowTimeDAO extends DBContext {
     public boolean addShowtime(Showtime Showtime) {
@@ -391,6 +389,61 @@ public class ShowTimeDAO extends DBContext {
         }
 
         return showtime;
+    }
+    public List<Object[]> getMostPopularShowtimes_Admin() {
+        List<Object[]> popularTimes = new ArrayList<>();
+
+        String query = "WITH PopularSlots AS (\n" +
+                "            SELECT \n" +
+                "                s.showdate,\n" +
+                "                s.starttime,\n" +
+                "                s.endtime,\n" +
+                "                r.cinemaId,\n" +
+                "                COUNT(*) AS SlotCount,\n" +
+                "                ROW_NUMBER() OVER (PARTITION BY r.cinemaId ORDER BY COUNT(*) DESC) AS row_num\n" +
+                "            FROM \n" +
+                "                Showtime s\n" +
+                "            JOIN \n" +
+                "                Room r ON s.roomId = r.roomId\n" +
+                "            GROUP BY \n" +
+                "                s.showdate, s.starttime, s.endtime, r.cinemaId\n" +
+                "        )\n" +
+                "        SELECT \n" +
+                "            c.[name] AS cinemaName,\n" +
+                "            c.logo,\n" +
+                "            p.showdate,\n" +
+                "            p.starttime,\n" +
+                "            p.endtime\n" +
+                "        FROM \n" +
+                "            PopularSlots p\n" +
+                "        JOIN \n" +
+                "            Cinema c ON p.cinemaId = c.cinemaId\n" +
+                "        WHERE \n" +
+                "            p.row_num = 1\n" +
+                "        ORDER BY \n" +
+                "            p.SlotCount DESC";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String cinemaName = rs.getString("cinemaName");
+                String logo = rs.getString("logo");
+                Date showDate = rs.getDate("showdate");
+                Time startTime = rs.getTime("starttime");
+                Time endTime = rs.getTime("endtime");
+
+                popularTimes.add(new Object[]{cinemaName, logo, showDate, startTime, endTime});
+            }
+
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return popularTimes;
     }
     public static void main(String[] args) {
         ShowTimeDAO dao = new ShowTimeDAO();
