@@ -42,6 +42,10 @@ public class Account {
         return UID;
     }
 
+    public void setUID(int UID) {
+        this.UID = UID;
+    }
+
     public String getName() {
         return name;
     }

@@ -1,18 +1,19 @@
 package repository;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.sql.Connection;
+
 import model.Room;
 import model.Cinema;
-
 
 
 import context.DBContext;
 
 
-public class RoomDAO extends DBContext{
+public class RoomDAO extends DBContext {
 
     public ArrayList<Room> getListRoom() {
         ArrayList<Room> rooms = new ArrayList<>();
@@ -45,28 +46,28 @@ public class RoomDAO extends DBContext{
 
     // Method to add a new Room using Room object
     public boolean addNewRoom(Room room) {
-            String sql = "INSERT INTO Room ([name], numberOfSeat, cinemaId) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Room ([name], numberOfSeat, cinemaId) VALUES (?, ?, ?)";
 
-            try {
-                // Sử dụng connection từ DBContext
-                PreparedStatement ps = connection.prepareStatement(sql);
+        try {
+            // Sử dụng connection từ DBContext
+            PreparedStatement ps = connection.prepareStatement(sql);
 
-                // Set các tham số cho truy vấn SQL từ đối tượng Room
-                ps.setString(1, room.getName());
-                ps.setInt(2, room.getNumberOfSeat());
-                ps.setInt(3, room.getCinema().getCinemaId());  // Lấy cinemaId từ đối tượng Cinema
+            // Set các tham số cho truy vấn SQL từ đối tượng Room
+            ps.setString(1, room.getName());
+            ps.setInt(2, room.getNumberOfSeat());
+            ps.setInt(3, room.getCinema().getCinemaId());  // Lấy cinemaId từ đối tượng Cinema
 
-                // Thực thi câu lệnh SQL để thêm phòng mới
-                ps.executeUpdate();
-                System.out.println("New room added successfully!");
-                return true;
+            // Thực thi câu lệnh SQL để thêm phòng mới
+            ps.executeUpdate();
+            System.out.println("New room added successfully!");
+            return true;
 
-            } catch (SQLException e) {
-                // Xử lý ngoại lệ SQL
-                System.out.println("Error when adding new room: " + e.getMessage());
-                return false;
-            }
+        } catch (SQLException e) {
+            // Xử lý ngoại lệ SQL
+            System.out.println("Error when adding new room: " + e.getMessage());
+            return false;
         }
+    }
 
     public boolean deleteRoom(int roomId) {
         String sql = "DELETE FROM Room WHERE roomId = ?";
@@ -89,6 +90,7 @@ public class RoomDAO extends DBContext{
             return false;
         }
     }
+
     public Room getRoomById(int roomId) {
         Room room = null;
 
@@ -121,20 +123,7 @@ public class RoomDAO extends DBContext{
     }
 
     public boolean updateRoom(int roomId, Room room) {
-        String sql = "UPDATE Room SET name = ?, numberOfSeat = ?, cinemaId = ? WHERE roomId = ?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, room.getName());
-            ps.setInt(2, room.getNumberOfSeat());
-            ps.setInt(3, room.getCinema().getCinemaId());
-            ps.setInt(4, roomId);
-
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            System.out.println("Error when updating room: " + e.getMessage());
-            return false;
-        }
+        return false;
     }
 
     public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
