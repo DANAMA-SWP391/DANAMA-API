@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookingController Test</title>
+    <script>
+        // Function to send POST request to BookingController
+        async function sendBookingRequest() {
+            // Collect booking data
+            const booking = {
+                bookingId: 0, // Assume bookingId is auto-generated
+                totalCost: document.getElementById("totalCost").value,
+                timestamp: getCurrentDateTime(), // Automatically use the current time
+                user: {
+                    UID: 1 // Assume user is already logged in with UID 1
+                },
+                status: 0 // Booking status is set to 0
+            };
+
+            // Collect ticket data
+            const tickets = [];
+            const ticketRows = document.querySelectorAll(".ticket-row");
+            ticketRows.forEach(row => {
+                const seatId = row.querySelector(".seat").value;
+                const showtimeId = row.querySelector(".showtime").value;
+                const name = row.querySelector(".name").value;
+                const email = row.querySelector(".email").value;
+                const phone = row.querySelector(".phone").value;
+
+                const ticket = {
+                    price: parseFloat(document.getElementById("ticketPrice").value),
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    showtime: { showtimeId: showtimeId },
+                    seat: { seatId: seatId }
+                };
+                tickets.push(ticket);
+            });
+
+            // Send booking and tickets data as a JSON object
+            try {
+                const response = await fetch('http://localhost:8080/DANAMA_war_exploded/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        booking: booking,
+                        tickets: tickets
+                    })
+                });
+
+                const result = await response.json();
+                document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        function getCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;  // Returns the date and time as "YYYY-MM-DD HH:MM:SS"
+        }
+        // Function to add a new ticket input row
+        function addTicketRow() {
+            const ticketsContainer = document.getElementById("ticketsContainer");
+            const newTicketRow = document.createElement("div");
+            newTicketRow.classList.add("ticket-row");
+
+            newTicketRow.innerHTML = `
+                <label>Seat ID (1-10):</label>
+                <input type="number" class="seat" placeholder="Seat ID" min="1" max="10" required>
+                <label>Showtime ID (1 or 2):</label>
+                <input type="number" class="showtime" placeholder="Showtime ID" min="1" max="2" required>
+                <label>Name:</label>
+                <input type="text" class="name" placeholder="Your Name" required>
+                <label>Email:</label>
+                <input type="email" class="email" placeholder="Your Email" required>
+                <label>Phone:</label>
+                <input type="tel" class="phone" placeholder="Your Phone" required>
+                <br>
+            `;
+            ticketsContainer.appendChild(newTicketRow);
+        }
+    </script>
+</head>
+<body>
+
+<h1>Test BookingController</h1>
+
+<h3>Booking Information</h3>
+<label for="totalCost">Total Cost:</label>
+<input type="number" id="totalCost" placeholder="Total Cost" step="0.01" required>
+<br><br>
+
+<h3>Ticket Information</h3>
+<div id="ticketsContainer">
+    <div class="ticket-row">
+        <label>Seat ID (1-10):</label>
+        <input type="number" class="seat" placeholder="Seat ID" min="1" max="10" required>
+        <label>Showtime ID (1 or 2):</label>
+        <input type="number" class="showtime" placeholder="Showtime ID" min="1" max="2" required>
+        <label>Name:</label>
+        <input type="text" class="name" placeholder="Your Name" required>
+        <label>Email:</label>
+        <input type="email" class="email" placeholder="Your Email" required>
+        <label>Phone:</label>
+        <input type="tel" class="phone" placeholder="Your Phone" required>
+        <br>
+    </div>
+</div>
+<button type="button" onclick="addTicketRow()">Add Another Ticket</button>
+<br><br>
+
+<h3>Ticket Price</h3>
+<label for="ticketPrice">Price per Ticket:</label>
+<input type="number" id="ticketPrice" placeholder="Ticket Price" step="0.01" required>
+<br><br>
+
+<button onclick="sendBookingRequest()">Submit Booking</button>
+
+<h3>Result:</h3>
+<pre id="result"></pre>
+
+</body>
+</html>

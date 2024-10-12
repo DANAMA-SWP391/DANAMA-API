@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ReviewDAO extends DBContext {
     // Method to add a new review to the database
-    public void addNewReview(Review review) {
+    public boolean addNewReview(Review review) {
         String sql = "INSERT INTO Review (rating, comment, [date], [UID], movieId) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement statement = null;
 
@@ -25,14 +25,16 @@ public class ReviewDAO extends DBContext {
             statement.setInt(1, review.getRating());
             statement.setString(2, review.getComment());
             statement.setDate(3, new Date(review.getDate().getTime())); // Correct conversion from java.util.Date to java.sql.Date
-            statement.setInt(4, review.getUID());
+            statement.setInt(4, review.getUid());
             statement.setInt(5, review.getMovieId());
 
             // Execute the update
             statement.executeUpdate();
+            return true;
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         } finally {
             try {
                 if (statement != null) statement.close();
@@ -88,7 +90,63 @@ public class ReviewDAO extends DBContext {
 
         return reviews;
     }
+    public boolean updateReview(Review review) {
 
+        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ?, UID = ?, movieId = ? WHERE reviewId = ?";
+        PreparedStatement statement = null;
+
+        try {
+            // Using the connection from DBContext
+            statement = connection.prepareStatement(sql);
+
+            // Set the parameters
+            statement.setInt(1, review.getRating());
+            statement.setString(2, review.getComment());
+            statement.setDate(3, new Date(review.getDate().getTime()));
+            statement.setInt(4, review.getUid());
+            statement.setInt(5, review.getMovieId());
+            statement.setInt(6, review.getReviewId());
+
+            // Execute the update
+            statement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (statement != null) statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public boolean deleteReview(int reviewId) {
+        String sql = "DELETE FROM Review WHERE reviewId = ?";
+        PreparedStatement statement = null;
+
+        try {
+            // Using the connection from DBContext
+            statement = connection.prepareStatement(sql);
+
+            // Set parameter
+            statement.setInt(1, reviewId);
+
+            // Execute the update
+            statement.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (statement != null) statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     public static void main(String[] args) {
 //        java.util.Date date = new java.util.Date();
 //        Review newReview = new Review(3, 5, "Nice!", date, 4, 3);

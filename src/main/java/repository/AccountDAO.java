@@ -103,7 +103,52 @@ public class AccountDAO extends DBContext {
             }
         }
     }
+    public boolean updateProfile(Account account) {
 
+        String sql = "UPDATE Account SET name = ?, phone = ?, avatar = ? WHERE UID = ?";
+        PreparedStatement ps = null;
+
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, account.getName());
+            ps.setString(2, account.getPhone());
+            ps.setString(3, account.getAvatar());
+            ps.setInt(4, account.getUID());
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public boolean updatePassword(int UID, String password) {
+        String sql = "UPDATE Account SET password = ? WHERE UID = ?";
+        PreparedStatement ps = null;
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, password);
+            ps.setInt(2, UID);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     public boolean banAccount(int UID) {
 
         String sql = "UPDATE Account SET roleId = 0 WHERE UID = ?";
@@ -187,7 +232,6 @@ public class AccountDAO extends DBContext {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return account;
     }
 
