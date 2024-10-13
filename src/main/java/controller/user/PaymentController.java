@@ -8,11 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet(name = "PaymentController", value = "/PaymentController")
+@WebServlet(name = "PaymentController", value = "/payment")
 public class PaymentController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        doPost(request,response);
     }
 
     @Override

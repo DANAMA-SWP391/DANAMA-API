@@ -3,4 +3,21 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
+    <servlet>
+        <servlet-name>HomeController</servlet-name>
+        <servlet-class>controller.web.HomeController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerDashBoardController</servlet-name>
+        <servlet-class>controller.cManager.DashBoardController</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>HomeController</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerDashBoardController</servlet-name>
+        <url-pattern>managerDashBoard</url-pattern>
+    </servlet-mapping>
 </web-app>

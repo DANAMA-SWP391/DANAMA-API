@@ -8,7 +8,7 @@ public class Review {
     private int rating;
     private String comment;
     private Date date;
-    private int UID;
+    private int uid;
     private int movieId;
 
     // Default constructor
@@ -16,12 +16,12 @@ public class Review {
     }
 
     // Parameterized constructor
-    public Review(int reviewId, int rating, String comment, Date date, int UID, int movieId) {
+    public Review(int reviewId, int rating, String comment, Date date, int uid, int movieId) {
         this.reviewId = reviewId;
         this.rating = rating;
         this.comment = comment;
         this.date = date;
-        this.UID = UID;
+        this.uid = uid;
         this.movieId = movieId;
     }
 
@@ -54,12 +54,12 @@ public class Review {
         this.date = date;
     }
 
-    public int getUID() {
-        return UID;
+    public int getUid() {
+        return uid;
     }
 
-    public void setUID(int UID) {
-        this.UID = UID;
+    public void setUID(int uid) {
+        this.uid = uid;
     }
 
     public int getMovieId() {
@@ -72,7 +72,7 @@ public class Review {
 
     @Override
     public String toString() {
-        return "Review{" + "reviewId=" + reviewId + ", rating=" + rating + ", comment=" + comment + ", date=" + date + ", UID=" + UID + ", movieId=" + movieId + '}';
+        return "Review{" + "reviewId=" + reviewId + ", rating=" + rating + ", comment=" + comment + ", date=" + date + ", uid=" + uid + ", movieId=" + movieId + '}';
     }
     
 }

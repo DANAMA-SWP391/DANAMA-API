@@ -190,8 +190,52 @@ public class TicketDAO extends DBContext {
         return averageTicketCount;
     }
 
+
+    public ArrayList<Integer> getTicketsSoldPerMonth(int cinemaId) {
+        ArrayList<Integer> ticketData = new ArrayList<>(12);
+        for (int i = 0; i < 12; i++) {
+            ticketData.add(0);
+        }
+
+        String sql = "SELECT MONTH(b.timestamp) AS [Month], " +
+                "COUNT(t.ticketId) AS totalTickets " +
+                "FROM Ticket t " +
+                "JOIN Booking b ON t.bookingId = b.bookingId " +
+                "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
+                "JOIN Room r ON st.roomId = r.roomId " +
+                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
+                "WHERE c.cinemaId = ? " +
+                "GROUP BY MONTH(b.timestamp) " +
+                "ORDER BY MONTH(b.timestamp)";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, cinemaId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                int month = resultSet.getInt("Month");
+                int totalTickets = resultSet.getInt("totalTickets");
+                ticketData.set(month - 1, totalTickets); // month - 1 to adjust for zero-based index
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ticketData;
+    }
+
     public static void main(String[] args) {
         TicketDAO dao = new TicketDAO();
         System.out.println(dao.getTicketByBooking(1));
+
+
+        ArrayList arr = dao.getTicketsSoldPerMonth(1);
+        for(Object o: arr) {
+            System.out.println(o);
+        }
     }
 }
