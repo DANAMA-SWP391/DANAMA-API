@@ -156,7 +156,8 @@ public class SeatDAO extends DBContext {
 //            seatDAO.deleteSeat(6);
 //        seatDAO.changeSeatTypeByID(2, "VIP");
 //        System.out.println(seatDAO.getListSeatsInRoom(1));
-        System.out.println(seatDAO.getSeatById(1));
+//        System.out.println(seatDAO.getSeatById(1));
+            seatDAO.deleteSeat(29);
     }
 
 

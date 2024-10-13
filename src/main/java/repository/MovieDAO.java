@@ -321,6 +321,58 @@ public class MovieDAO extends DBContext {
 
         return topMovies;
     }
+    public List<Object[]> getMostWatchedMovies_Admin() {
+        List<Object[]> movies = new ArrayList<>();
+
+        String query = """
+            WITH MovieStats AS (
+                SELECT\s
+                    m.name AS movieName,
+                    m.poster AS moviePoster,
+                    COUNT(t.ticketId) AS totalTicketsSold, \s
+                    SUM(t.price) AS totalRevenue    \s
+                FROM\s
+                    Ticket t
+                JOIN\s
+                    Showtime s ON t.showtimeId = s.showtimeId
+                JOIN\s
+                    Movie m ON s.movieId = m.movieId
+                GROUP BY\s
+                    m.movieId, m.name, m.poster
+            )
+            SELECT\s
+                TOP 5
+                ms.movieName,
+                ms.moviePoster,
+                ms.totalTicketsSold,
+                ms.totalRevenue
+            FROM\s
+                MovieStats ms
+            ORDER BY\s
+                ms.totalTicketsSold DESC;
+        """;
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            // Process the result set
+            while (rs.next()) {
+                Object[] movieData = new Object[4];
+                movieData[0] = rs.getString("movieName");         // Movie name
+                movieData[1] = rs.getString("moviePoster");       // Movie poster
+                movieData[2] = rs.getInt("totalTicketsSold");     // Total tickets sold
+                movieData[3] = rs.getDouble("totalRevenue");      // Total revenue
+
+                // Add movie data to the list
+                movies.add(movieData);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle any SQL exceptions
+        }
+
+        return movies;
+    }
 
     // Test method
     public static void main(String[] args) {

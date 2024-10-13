@@ -4,10 +4,9 @@ package repository;
 import context.DBContext;
 import model.Cinema;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CinemaDAO extends DBContext {
     public ArrayList<Cinema> getListCinemas() {
@@ -122,7 +121,7 @@ public class CinemaDAO extends DBContext {
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         } finally {
@@ -133,6 +132,7 @@ public class CinemaDAO extends DBContext {
             }
         }
     }
+
     public boolean deleteCinema(int cinemaId) {
 
         String sql = "DELETE FROM Cinema WHERE cinemaId = ?";
@@ -155,6 +155,7 @@ public class CinemaDAO extends DBContext {
             }
         }
     }
+
     public double getTotalCinemaRevenue(int cinemaId) {
         double totalRevenue = 0.0;
 
@@ -184,12 +185,9 @@ public class CinemaDAO extends DBContext {
     }
 
 
+
     //Testing
     public static void main(String[] args) {
-        CinemaDAO cinemaDAO= new CinemaDAO();
-//        for(Cinema cinema: cinemaDAO.getListCinemas()) {
-//            System.out.println(cinema);
-//        }
-        System.out.println(cinemaDAO.getTotalCinemaRevenue(1));
+
     }
 }
