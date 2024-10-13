@@ -76,11 +76,13 @@ public class BookingDAO extends DBContext {
         return bookingHistory;
     }
 
+
     public ArrayList<Booking> getListBookingByCinema(int cinemaId) {
         ArrayList<Booking> bookingList = new ArrayList<>();
-        String sql = "SELECT b.bookingId, b.totalcost, b.timestamp, b.UID " +
+        String sql = "SELECT DISTINCT b.bookingId, b.totalcost, b.timestamp, b.UID " +
                 "FROM Booking b " +
-                "JOIN Showtime st ON b.showtimeId = st.showtimeId " +
+                "JOIN Ticket t ON b.bookingId = t.bookingId " +
+                "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
                 "WHERE c.cinemaId = ?";
@@ -257,6 +259,12 @@ public class BookingDAO extends DBContext {
     }
 
     public static void main(String[] args) {
+BookingDAO dao = new BookingDAO();
+ArrayList<Booking> list = dao.getListBookingByCinema(1);
+
+for(Booking b: list) {
+    System.out.println(b.toString());
+}
 
     }
 }

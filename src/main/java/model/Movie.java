@@ -29,6 +29,10 @@ public class Movie {
     public Movie() {
     }
 
+    public Movie(int movieId) {
+        this.movieId = movieId;
+    }
+
     public Movie(int movieId, String name, String description, String poster, String trailer, Date releaseDate, String country, String director, int ageRestricted, String actors, int duration, int status, List<Genre> genres) {
         this.movieId = movieId;
         this.name = name;
