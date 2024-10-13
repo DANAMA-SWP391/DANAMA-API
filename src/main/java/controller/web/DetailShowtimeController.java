@@ -31,7 +31,6 @@ public class DetailShowtimeController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         Gson gson = new Gson();
         JsonObject data = gson.fromJson(request.getReader(), JsonObject.class);
-
         int showtimeId = data.get("showtimeId").getAsInt();
         ShowTimeDAO showTimeDAO= new ShowTimeDAO();
         Showtime showtime = showTimeDAO.getShowtimeById(showtimeId);
