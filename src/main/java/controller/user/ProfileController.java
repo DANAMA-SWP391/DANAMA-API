@@ -1,6 +1,7 @@
 package controller.user;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,11 +20,14 @@ public class ProfileController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession();
-        Account user= (Account) session.getAttribute("user");
+//        HttpSession session = request.getSession();
+//        Account user= (Account) session.getAttribute("user");
         Gson gson = new Gson();
-        HashMap<String,Object> responseData = new HashMap<>();
-        responseData.put("user",user);
+        int uid = Integer.parseInt(request.getParameter("uid"));
+        AccountDAO accountDAO = new AccountDAO();
+        Account user= accountDAO.getAccountById(uid);
+        JsonObject responseData = new JsonObject();
+        responseData.add("user",gson.toJsonTree(user));
         String json = gson.toJson(responseData);
         response.getWriter().write(json);
         response.getWriter().flush();
