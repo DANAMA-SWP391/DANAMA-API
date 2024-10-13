@@ -41,6 +41,40 @@ public class BookingDAO extends DBContext {
         return booking;
     }
 
+    public Booking getBookingByUserAndDate(int userId, Date timestamp) {
+        Booking booking = null;
+        String sql = "SELECT bookingId, totalcost, timestamp, UID FROM Booking WHERE UID = ? AND CAST(timestamp AS DATE) = CAST(? AS DATE)";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setTimestamp(2, new Timestamp(timestamp.getTime())); // Convert java.util.Date to SQL timestamp
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                booking = new Booking();
+                booking.setBookingId(resultSet.getInt("bookingId"));
+                booking.setTotalCost(resultSet.getDouble("totalcost"));
+
+                Timestamp dbTimestamp = resultSet.getTimestamp("timestamp");
+                if (dbTimestamp != null) {
+                    booking.setTimestamp(new Date(dbTimestamp.getTime())); // Convert to java.util.Date
+                }
+
+                AccountDAO accountDAO = new AccountDAO();
+                Account user = accountDAO.getAccountById(resultSet.getInt("UID"));
+                booking.setUser(user);
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return booking;
+    }
+
     public ArrayList<Booking> getBookingHistory(int userId) {
 
         ArrayList<Booking> bookingHistory = new ArrayList<>();
@@ -76,13 +110,11 @@ public class BookingDAO extends DBContext {
         return bookingHistory;
     }
 
-
     public ArrayList<Booking> getListBookingByCinema(int cinemaId) {
         ArrayList<Booking> bookingList = new ArrayList<>();
-        String sql = "SELECT DISTINCT b.bookingId, b.totalcost, b.timestamp, b.UID " +
+        String sql = "SELECT b.bookingId, b.totalcost, b.timestamp, b.UID " +
                 "FROM Booking b " +
-                "JOIN Ticket t ON b.bookingId = t.bookingId " +
-                "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
+                "JOIN Showtime st ON b.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
                 "WHERE c.cinemaId = ?";
@@ -123,14 +155,13 @@ public class BookingDAO extends DBContext {
 
     public boolean addBooking(Booking booking) {
 
-        String sql = "INSERT INTO Booking (bookingId, totalCost, timestamp, UID, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Booking (totalCost, timestamp, UID, status) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, booking.getBookingId());
-            ps.setDouble(2, booking.getTotalCost());
-            ps.setTimestamp(3, new Timestamp(booking.getTimestamp().getTime()));
-            ps.setInt(4, booking.getUser().getUID());
-            ps.setInt(5, booking.getStatus());
+            ps.setDouble(1, booking.getTotalCost());
+            ps.setTimestamp(2, new Timestamp(booking.getTimestamp().getTime()));
+            ps.setInt(3, booking.getUser().getUID());
+            ps.setInt(4, booking.getStatus());
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
@@ -259,12 +290,9 @@ public class BookingDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-BookingDAO dao = new BookingDAO();
-ArrayList<Booking> list = dao.getListBookingByCinema(1);
-
-for(Booking b: list) {
-    System.out.println(b.toString());
-}
+        BookingDAO bookingDAO = new BookingDAO();
+        Booking booking = bookingDAO.getBookingById(1);
+        System.out.println(bookingDAO.getBookingByUserAndDate(booking.getUser().getUID(), booking.getTimestamp()));
 
     }
 }
