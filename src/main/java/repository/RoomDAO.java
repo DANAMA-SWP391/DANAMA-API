@@ -11,6 +11,7 @@ import model.Cinema;
 
 
 import context.DBContext;
+import model.Showtime;
 
 
 public class RoomDAO extends DBContext {
@@ -122,12 +123,29 @@ public class RoomDAO extends DBContext {
         return room;
     }
 
-    public boolean updateRoom(int roomId, Room room) {
+    public boolean updateRoom(int roomId , Room room) {
+        String sql = "UPDATE Room SET name = ?, numberOfSeat = ?, cinemaId = ? WHERE roomId = ?";
+        try (Connection conn = connection;
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, room.getName());
+            ps.setInt(2, room.getNumberOfSeat());
+            ps.setInt(3, room.getCinema().getCinemaId());
+            ps.setInt(4, roomId);
+
+            int rowsUpdated = ps.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
+
+
+
     public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
-        ArrayList<Room> rooms = new ArrayList<>();
+        ArrayList<Room> rooms = new ArrayList<Room>();
         String query = "SELECT r.roomId, r.name, r.numberOfSeat, c.cinemaId, c.name, c.logo, c.address, c.description, c.image, c.managerId " +
                 "FROM Room r " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +

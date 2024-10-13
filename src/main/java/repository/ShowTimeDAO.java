@@ -14,19 +14,18 @@ import java.util.List;
 public class ShowTimeDAO extends DBContext {
     public boolean addShowtime(Showtime Showtime) {
         
-        String sql = "INSERT INTO Showtime (showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, seatAvailable, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Showtime ( showdate, starttime, endtime, baseprice, movieId, roomId, seatAvailable, status) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, Showtime.getShowtimeId());
-            preparedStatement.setDate(2, new java.sql.Date(Showtime.getShowDate().getTime())); // converting java.util.Date to java.sql.Date
-            preparedStatement.setTime(3, Showtime.getStartTime());
-            preparedStatement.setTime(4, Showtime.getEndTime());
-            preparedStatement.setDouble(5, Showtime.getBasePrice());
-            preparedStatement.setInt(6, Showtime.getMovie().getMovieId());
-            preparedStatement.setInt(7, Showtime.getRoom().getRoomId());
-            preparedStatement.setInt(8, Showtime.getSeatAvailable());
-            preparedStatement.setInt(9, Showtime.getStatus());
+            preparedStatement.setDate(1, new java.sql.Date(Showtime.getShowDate().getTime())); // converting java.util.Date to java.sql.Date
+            preparedStatement.setTime(2, Showtime.getStartTime());
+            preparedStatement.setTime(3, Showtime.getEndTime());
+            preparedStatement.setDouble(4, Showtime.getBasePrice());
+            preparedStatement.setInt(5, Showtime.getMovie().getMovieId());
+            preparedStatement.setInt(6, Showtime.getRoom().getRoomId());
+            preparedStatement.setInt(7, Showtime.getSeatAvailable());
+            preparedStatement.setInt(8, Showtime.getStatus());
 
             int affectedRows = preparedStatement.executeUpdate();
             preparedStatement.close();
