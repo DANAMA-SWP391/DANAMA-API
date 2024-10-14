@@ -29,6 +29,14 @@ public class Cinema {
         this.image = image;
         this.managerId = managerId;
     }
+    public Cinema(String name, String logo, String address, String description, String image, int managerId) {
+        this.name = name;
+        this.logo = logo;
+        this.address = address;
+        this.description = description;
+        this.image = image;
+        this.managerId = managerId;
+    }
 
     public int getCinemaId() {
         return cinemaId;
