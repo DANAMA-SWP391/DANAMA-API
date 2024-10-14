@@ -23,10 +23,11 @@ public class BookingHistoryController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("account");
+//        HttpSession session = request.getSession();
+//        Account account = (Account) session.getAttribute("account");
+        int uid = Integer.parseInt(request.getParameter("uid"));
         BookingDAO bookingDAO= new BookingDAO();
-        List<Booking> bookings= bookingDAO.getBookingHistory(account.getUID());
+        List<Booking> bookings= bookingDAO.getBookingHistory(uid);
         Gson gson = new Gson();
         HashMap<String,Object> responseData = new HashMap<>();
         responseData.put("bookings",bookings);
