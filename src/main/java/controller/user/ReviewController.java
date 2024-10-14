@@ -46,9 +46,9 @@ public class ReviewController extends HttpServlet {
                     success = reviewDAO.updateReview(reviewUpdate) ;
                     break;
                 case "DELETE":
-                    Review reviewDelete = gson.fromJson(jsonObject.get("review"), Review.class);
-                    System.out.println(reviewDelete);
-                    success = reviewDAO.deleteReview(reviewDelete.getReviewId()) ;
+                    int reviewId = jsonObject.get("reviewId").getAsInt();
+                    System.out.println(reviewId);
+                    success = reviewDAO.deleteReview(reviewId) ;
                     break;
                 default:
                     success = false;
@@ -59,6 +59,7 @@ public class ReviewController extends HttpServlet {
             JsonObject responseJson = new JsonObject();
             responseJson.addProperty("success", success);
             response.getWriter().write(gson.toJson(responseJson));
+            response.getWriter().flush();
         } catch (Exception e) {
             e.printStackTrace();
             // Return error response as JSON

@@ -39,6 +39,7 @@ public class ProfileController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         Gson gson = new Gson();
         Account user= gson.fromJson(request.getReader(),Account.class);
+        System.out.println(user);
         AccountDAO accountDAO = new AccountDAO();
         String sucess;
         if(accountDAO.updateProfile(user)){
