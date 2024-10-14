@@ -297,6 +297,6 @@ public class BookingDAO extends DBContext {
 
     public static void main(String[] args) {
         BookingDAO bookingDAO = new BookingDAO();
-        System.out.println(bookingDAO.getDailyTotalCostByCinema(1));
+        System.out.println(bookingDAO.getBookingHistory(1));
     }
 }
