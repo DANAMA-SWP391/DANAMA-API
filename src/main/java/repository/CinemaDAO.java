@@ -184,10 +184,59 @@ public class CinemaDAO extends DBContext {
         return totalRevenue;
     }
 
+    public List<Object[]> getTotalRevenueForAllCinemas_Admin() {
+        List<Object[]> cinemaRevenueList = new ArrayList<>();
+
+        String sql = "WITH CinemaRevenue AS (" +
+                "    SELECT c.cinemaId, c.[name] AS cinemaName, SUM(t.price) AS totalRevenue " +
+                "    FROM Cinema c " +
+                "    LEFT JOIN Room r ON c.cinemaId = r.cinemaId " +
+                "    LEFT JOIN Showtime s ON r.roomId = s.roomId " +
+                "    LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
+                "    GROUP BY c.cinemaId, c.[name] " +
+                ") " +
+                "SELECT cr.cinemaName, ISNULL(cr.totalRevenue, 0) AS totalRevenue " +
+                "FROM CinemaRevenue cr " +
+                "ORDER BY cr.totalRevenue DESC;";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            // Duyệt qua kết quả và thêm vào danh sách
+            while (rs.next()) {
+                String cinemaName = rs.getString("cinemaName");
+                double totalRevenue = rs.getDouble("totalRevenue");
+                cinemaRevenueList.add(new Object[]{cinemaName, totalRevenue});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return cinemaRevenueList;
+    }
+
+
+
 
 
     //Testing
     public static void main(String[] args) {
+/*        CinemaDAO cinemaDAO = new CinemaDAO();
 
+        // Gọi hàm getTotalRevenueForAllCinemas() và lưu kết quả vào danh sách
+        List<Object[]> cinemaRevenueList = cinemaDAO.getTotalRevenueForAllCinemas();
+
+        // Kiểm tra kết quả - duyệt qua danh sách và in ra thông tin của từng rạp
+        if (cinemaRevenueList.isEmpty()) {
+            System.out.println("Không có doanh thu nào được tìm thấy.");
+        } else {
+            System.out.println("Danh sách doanh thu các rạp:");
+            for (Object[] cinemaRevenue : cinemaRevenueList) {
+                String cinemaName = (String) cinemaRevenue[0];
+                double totalRevenue = (double) cinemaRevenue[1];
+                System.out.println("Rạp: " + cinemaName + " - Doanh thu: " + totalRevenue);
+            }
+        }*/
     }
 }
