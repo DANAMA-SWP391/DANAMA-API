@@ -17,15 +17,20 @@ import repository.TicketDAO;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@WebServlet(name = "DashBoardController", value = "/cManagerDashBoard")
+@WebServlet(name = "DashBoardController", value = "/managerDashBoard")
 public class DashBoardController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    doPost(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class) ;
-        int cinemaId = jsonObject.get("cinemaId").getAsInt();
+        int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
+
 
         ShowTimeDAO showtimeDAO = new ShowTimeDAO();
         TicketDAO ticketDAO = new TicketDAO();
@@ -40,7 +45,7 @@ public class DashBoardController extends HttpServlet {
 
 
 
-        jsonObject = new JsonObject();
+        JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("dailytotalrevenue", dailytotalrevenue);
         jsonObject.addProperty("monthtotalrevenue", monthtotalrevenue);
         jsonObject.addProperty("populartimeslot", populartimeslot);
@@ -51,10 +56,5 @@ public class DashBoardController extends HttpServlet {
         response.getWriter().write(json);
         response.getWriter().flush();
         response.getWriter().close();
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
     }
 }
