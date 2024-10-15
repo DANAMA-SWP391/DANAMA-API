@@ -27,13 +27,13 @@ public class ShowtimeController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class) ;
-        int cinemaId = jsonObject.get("cinemaId").getAsInt();
+
+        int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
 
         ShowTimeDAO showtimeDAO = new ShowTimeDAO();
         ArrayList<Showtime> showtimes = showtimeDAO.getListShowtimesByCinemaID(cinemaId);
 
-        jsonObject = new JsonObject();
+        JsonObject jsonObject = new JsonObject();
         jsonObject.add("showtimes", gson.toJsonTree(showtimes));
 
         String json = gson.toJson(jsonObject);

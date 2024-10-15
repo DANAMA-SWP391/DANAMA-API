@@ -24,13 +24,13 @@ public class SeatController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class) ;
-        int roomId = jsonObject.get("roomId").getAsInt();
+        int roomId = Integer.parseInt(request.getParameter("roomId"));
+
 
         SeatDAO seatDAO = new SeatDAO();
         ArrayList<Seat> seats = seatDAO.getListSeatsInRoom(roomId);
 
-        jsonObject = new JsonObject();
+        JsonObject jsonObject = new JsonObject();
         jsonObject.add("seats", gson.toJsonTree(seats));
         String json = gson.toJson(jsonObject);
 
