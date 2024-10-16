@@ -206,7 +206,34 @@ public class AccountDAO extends DBContext {
             }
         }
     }
+    public Account getAccountByEmail(String email) {
+        Account account = null;
+        String sql = "SELECT UID, name, email, phone, avatar, googleId, roleId FROM Account WHERE email = ?";
 
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, email);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                account = new Account();
+                account.setUID(resultSet.getInt("UID"));
+                account.setName(resultSet.getString("name"));
+                account.setEmail(resultSet.getString("email"));
+                account.setPhone(resultSet.getString("phone"));
+                account.setAvatar(resultSet.getString("avatar"));
+                account.setGoogleId(resultSet.getString("googleId"));
+                account.setRoleId(resultSet.getInt("roleId"));
+                account.setPassword(null);
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return account;
+    }
     public Account getAccountById(int UID) {
         Account account = null;
         String sql = "SELECT UID, name, email, phone, avatar, googleId, roleId FROM Account WHERE UID = ?";
@@ -225,6 +252,7 @@ public class AccountDAO extends DBContext {
                 account.setAvatar(resultSet.getString("avatar"));
                 account.setGoogleId(resultSet.getString("googleId"));
                 account.setRoleId(resultSet.getInt("roleId"));
+                account.setPassword(null);
             }
 
             resultSet.close();
@@ -252,6 +280,7 @@ public class AccountDAO extends DBContext {
                 account.setAvatar(resultSet.getString("avatar"));
                 account.setGoogleId(resultSet.getString("googleId"));
                 account.setRoleId(resultSet.getInt("roleId"));
+                account.setPassword(null);
             }
 
             resultSet.close();
@@ -329,7 +358,9 @@ public class AccountDAO extends DBContext {
 //        } else {
 //            System.out.println("Cập nhật tài khoản thất bại.");
 //        }
-        Account account = accountDAO.getAccountById(1);
-        System.out.println(account);
+//        Account account = accountDAO.getAccountById(1);
+//        System.out.println(account);
+        System.out.println(accountDAO.getAccountByEmail("admin@example.com"));
+        System.out.println(accountDAO.login("admin@example.com","adminpass"));
     }
 }
