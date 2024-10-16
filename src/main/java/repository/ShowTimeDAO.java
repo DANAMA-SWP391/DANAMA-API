@@ -79,7 +79,6 @@ public class ShowTimeDAO extends DBContext {
 
         return showtimes;
     }
-
     public ArrayList<Showtime> getListShowtimesByCinemaID(int cinemaId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
@@ -125,8 +124,6 @@ public class ShowTimeDAO extends DBContext {
 
         return showtimes;
     }
-
-
     public ArrayList<Showtime> getListShowtimesByRoom(int roomId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
@@ -197,7 +194,6 @@ public class ShowTimeDAO extends DBContext {
 
         return false;
     }
-
     public ArrayList<Showtime> getShowtimeByMovie(int movieId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
