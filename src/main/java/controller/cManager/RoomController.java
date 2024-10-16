@@ -7,12 +7,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Cinema;
 import model.Room;
-import model.Seat;
-import repository.CinemaDAO;
 import repository.RoomDAO;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -23,18 +19,22 @@ public class RoomController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class) ;
-        int cinemaId = jsonObject.get("cinemaId").getAsInt();
+        int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
 
         RoomDAO roomDAO = new RoomDAO();
         ArrayList<Room> rooms = roomDAO.getListRoomsByCinemaID(cinemaId);
 
-        jsonObject = new JsonObject();
+        JsonObject jsonObject = new JsonObject();
         jsonObject.add("rooms", gson.toJsonTree(rooms));
         String json = gson.toJson(jsonObject);
         response.getWriter().write(json);
         response.getWriter().flush();
         response.getWriter().close();
+
+
+
+
+
     }
 
     @Override
@@ -42,6 +42,7 @@ public class RoomController extends HttpServlet {
         Gson gson = new Gson();
         JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class) ;
         String action = jsonObject.get("action").getAsString();
+        System.out.println(jsonObject);
         RoomDAO roomDAO = new RoomDAO();
         boolean result = false;
 

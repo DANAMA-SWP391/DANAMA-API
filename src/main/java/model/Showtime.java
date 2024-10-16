@@ -19,6 +19,7 @@ public class Showtime {
     public Showtime() {
     }
 
+
     // Parameterized constructor
     public Showtime(int showtimeId, Date showDate, Time startTime, Time endTime, double basePrice, Movie movie, Room room, int seatAvailable, int status) {
         this.showtimeId = showtimeId;

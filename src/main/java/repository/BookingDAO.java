@@ -11,7 +11,7 @@ import java.util.Date;
 public class BookingDAO extends DBContext {
     public Booking getBookingById(int bookingId) {
         Booking booking = null;
-        String sql = "SELECT bookingId, totalcost, timestamp, UID FROM Booking WHERE bookingId = ?";
+        String sql = "SELECT bookingId, totalcost, timestamp, UID, status FROM Booking WHERE bookingId = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -22,7 +22,7 @@ public class BookingDAO extends DBContext {
                 booking = new Booking();
                 booking.setBookingId(resultSet.getInt("bookingId"));
                 booking.setTotalCost(resultSet.getDouble("totalcost"));
-
+                booking.setStatus(resultSet.getInt("status"));
                 Timestamp timestamp = resultSet.getTimestamp("timestamp");
                 if (timestamp != null) {
                     booking.setTimestamp(new Date(timestamp.getTime()));  // Convert to java.util.Date
@@ -43,7 +43,7 @@ public class BookingDAO extends DBContext {
 
     public Booking getBookingByUserAndDate(int userId, Date timestamp) {
         Booking booking = null;
-        String sql = "SELECT bookingId, totalcost, timestamp, UID FROM Booking WHERE UID = ? AND CAST(timestamp AS DATE) = CAST(? AS DATE)";
+        String sql = "SELECT bookingId, totalcost, timestamp, UID, status FROM Booking WHERE UID = ? AND CAST(timestamp AS DATE) = CAST(? AS DATE)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -55,7 +55,7 @@ public class BookingDAO extends DBContext {
                 booking = new Booking();
                 booking.setBookingId(resultSet.getInt("bookingId"));
                 booking.setTotalCost(resultSet.getDouble("totalcost"));
-
+                booking.setStatus(resultSet.getInt("status"));
                 Timestamp dbTimestamp = resultSet.getTimestamp("timestamp");
                 if (dbTimestamp != null) {
                     booking.setTimestamp(new Date(dbTimestamp.getTime())); // Convert to java.util.Date
@@ -78,7 +78,7 @@ public class BookingDAO extends DBContext {
     public ArrayList<Booking> getBookingHistory(int userId) {
 
         ArrayList<Booking> bookingHistory = new ArrayList<>();
-        String sql = "SELECT bookingId, totalcost, timestamp, UID FROM Booking WHERE UID = ?";
+        String sql = "SELECT bookingId, totalcost, timestamp, UID, status FROM Booking WHERE UID = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -89,7 +89,7 @@ public class BookingDAO extends DBContext {
                 Booking booking = new Booking();
                 booking.setBookingId(resultSet.getInt("bookingId"));
                 booking.setTotalCost(resultSet.getDouble("totalcost"));
-
+                booking.setStatus(resultSet.getInt("status"));
                 Timestamp timestamp = resultSet.getTimestamp("timestamp");
                 if (timestamp != null) {
                     booking.setTimestamp(new Date(timestamp.getTime()));  // Convert to java.util.Date
@@ -112,12 +112,15 @@ public class BookingDAO extends DBContext {
 
     public ArrayList<Booking> getListBookingByCinema(int cinemaId) {
         ArrayList<Booking> bookingList = new ArrayList<>();
-        String sql = "SELECT b.bookingId, b.totalcost, b.timestamp, b.UID " +
+        String sql = "SELECT b.bookingId, b.totalcost, b.timestamp, b.UID, b.status " +
                 "FROM Booking b " +
-                "JOIN Showtime st ON b.showtimeId = st.showtimeId " +
+                "JOIN Ticket t ON b.bookingId = t.bookingId " +
+                "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
-                "WHERE c.cinemaId = ?";
+                "WHERE c.cinemaId = ? " +
+                "GROUP BY b.bookingId, b.totalcost, b.timestamp, b.UID, b.status";
+
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -128,7 +131,7 @@ public class BookingDAO extends DBContext {
                 Booking booking = new Booking();
                 booking.setBookingId(resultSet.getInt("bookingId"));
                 booking.setTotalCost(resultSet.getDouble("totalcost"));
-
+                booking.setStatus(resultSet.getInt("status"));
                 // Retrieve the timestamp and convert it to java.util.Date
                 Timestamp timestamp = resultSet.getTimestamp("timestamp");
                 if (timestamp != null) {
@@ -233,8 +236,9 @@ public class BookingDAO extends DBContext {
         double totalCost = 0.0;
 
         // SQL query to get the sum of totalCost for bookings made today for a specific cinema
-        String sql = "SELECT SUM(b.totalCost) as dailyTotal FROM Booking b " +
-                "JOIN Showtime st ON b.showtimeId = st.showtimeId " +
+        String sql = "SELECT SUM(DISTINCT b.totalCost) as dailyTotal FROM Booking b " +
+                "JOIN Ticket t ON b.bookingId = t.bookingId " +
+                "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
                 "WHERE c.cinemaId = ? AND CAST(b.timestamp AS DATE) = CAST(GETDATE() AS DATE)";
@@ -265,11 +269,14 @@ public class BookingDAO extends DBContext {
 
     public double getTotalCostInCurrentMonthByCinema(int cinemaId) {
 
-        String sql = "SELECT SUM(b.totalCost) as monthlyTotal FROM Booking b " +
-                "JOIN Showtime st ON b.showtimeId = st.showtimeId " +
+        String sql = "SELECT SUM(DISTINCT b.totalCost) as monthlyTotal FROM Booking b " +
+                "JOIN Ticket t ON b.bookingId = t.bookingId " +
+                "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
-                "WHERE c.cinemaId = ? AND MONTH(b.timestamp) = MONTH(CURRENT_DATE) AND YEAR(b.timestamp) = YEAR(CURRENT_DATE)";
+                "WHERE c.cinemaId = ? " +
+                "AND MONTH(b.timestamp) = MONTH(CURRENT_DATE) " +
+                "AND YEAR(b.timestamp) = YEAR(CURRENT_DATE)";
 
         double totalCost = 0.0;
 
@@ -291,8 +298,6 @@ public class BookingDAO extends DBContext {
 
     public static void main(String[] args) {
         BookingDAO bookingDAO = new BookingDAO();
-        Booking booking = bookingDAO.getBookingById(1);
-        System.out.println(bookingDAO.getBookingByUserAndDate(booking.getUser().getUID(), booking.getTimestamp()));
-
+        System.out.println(bookingDAO.getDailyTotalCostByCinema(1));
     }
 }
