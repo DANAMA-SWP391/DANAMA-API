@@ -261,6 +261,26 @@ public class AccountDAO extends DBContext {
         }
         return account;
     }
+    public boolean login(String email, String password) {
+        String sql = "SELECT COUNT(*) FROM Account WHERE email = ? AND password = ?";
+
+        try  {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, email);
+            preparedStatement.setString(2, password);
+
+            ResultSet rs = preparedStatement.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     public ArrayList<Account> getListAccounts() {
         ArrayList<Account> accounts = new ArrayList<>();
