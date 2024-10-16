@@ -103,6 +103,7 @@ public class AccountDAO extends DBContext {
             }
         }
     }
+
     public boolean updateProfile(Account account) {
 
         String sql = "UPDATE Account SET name = ?, phone = ?, avatar = ? WHERE UID = ?";
@@ -128,6 +129,7 @@ public class AccountDAO extends DBContext {
             }
         }
     }
+
     public boolean updatePassword(int UID, String password) {
         String sql = "UPDATE Account SET password = ? WHERE UID = ?";
         PreparedStatement ps = null;
@@ -149,6 +151,7 @@ public class AccountDAO extends DBContext {
             }
         }
     }
+
     public boolean banAccount(int UID) {
 
         String sql = "UPDATE Account SET roleId = 0 WHERE UID = ?";
@@ -206,6 +209,7 @@ public class AccountDAO extends DBContext {
             }
         }
     }
+
     public Account getAccountByEmail(String email) {
         Account account = null;
         String sql = "SELECT UID, name, email, phone, avatar, googleId, roleId FROM Account WHERE email = ?";
@@ -234,6 +238,7 @@ public class AccountDAO extends DBContext {
         }
         return account;
     }
+
     public Account getAccountById(int UID) {
         Account account = null;
         String sql = "SELECT UID, name, email, phone, avatar, googleId, roleId FROM Account WHERE UID = ?";
@@ -262,6 +267,7 @@ public class AccountDAO extends DBContext {
         }
         return account;
     }
+
     public Account getAccountByGoogleId(String googleId) {
         Account account = null;
         String sql = "SELECT UID, name, email, phone, avatar, googleId, roleId FROM Account WHERE googleId = ?";
@@ -290,10 +296,11 @@ public class AccountDAO extends DBContext {
         }
         return account;
     }
+
     public boolean login(String email, String password) {
         String sql = "SELECT COUNT(*) FROM Account WHERE email = ? AND password = ?";
 
-        try  {
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, email);
             preparedStatement.setString(2, password);
@@ -310,6 +317,14 @@ public class AccountDAO extends DBContext {
         return false;
     }
 
+    public ArrayList<String> getListExistEmails() {
+        ArrayList<String> listEmails = new ArrayList<>();
+        ArrayList<Account> listAccounts = getListAccounts();
+        for (Account account : listAccounts) {
+            listEmails.add(account.getEmail());
+        }
+        return listEmails;
+    }
 
     public ArrayList<Account> getListAccounts() {
         ArrayList<Account> accounts = new ArrayList<>();
@@ -361,6 +376,6 @@ public class AccountDAO extends DBContext {
 //        Account account = accountDAO.getAccountById(1);
 //        System.out.println(account);
         System.out.println(accountDAO.getAccountByEmail("admin@example.com"));
-        System.out.println(accountDAO.login("admin@example.com","adminpass"));
+        System.out.println(accountDAO.login("admin@example.com", "adminpass"));
     }
 }

@@ -14,7 +14,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 public class Utility {
+
+
     public static class TimeDeserializer implements JsonDeserializer<Time> {
+
         @Override
         public Time deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String timeString = json.getAsString();
