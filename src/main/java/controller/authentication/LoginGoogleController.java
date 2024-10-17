@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Account;
 import repository.AccountDAO;
+import utils.JwtUtil;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -81,13 +82,23 @@ public class LoginGoogleController extends HttpServlet {
             }
 
             Account user = accountDAO.getAccountByGoogleId(googleId);
-            responseData.add("user", gson.toJsonTree(user));
+            String jwtToken = JwtUtil.generateToken(gson.toJson(user));
+            System.out.println("Generate:"+jwtToken);
+            responseData.addProperty("jwtToken", jwtToken);
+            JsonObject userJson = new JsonObject();
+            userJson.addProperty("name", user.getName());
+            userJson.addProperty("email", user.getEmail());
+            userJson.addProperty("avatar", user.getAvatar());
+            responseData.addProperty("success", true);
+            // Add the user object to the response
+            responseData.add("user", userJson);
 
             response.getWriter().write(gson.toJson(responseData));
             response.getWriter().flush();
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             responseData.addProperty("error", "Invalid Id Token");
+            responseData.addProperty("success", false);
             response.getWriter().write(gson.toJson(responseData));
             response.getWriter().flush();
         }
