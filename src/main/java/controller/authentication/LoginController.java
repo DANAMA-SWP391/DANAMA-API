@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Account;
 import repository.AccountDAO;
+import utils.JwtUtil;
 
 import java.io.IOException;
 @WebServlet(name = "LoginController", urlPatterns = {"/login"})
@@ -31,15 +32,36 @@ public class LoginController extends HttpServlet {
         JsonObject jsonResponse = new JsonObject();
 
         try {
+            // Parse the incoming JSON request body
             JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class);
             String email = jsonObject.get("email").getAsString();
             String password = jsonObject.get("password").getAsString();
+
+            // Authenticate user with AccountDAO
             AccountDAO accountDAO = new AccountDAO();
             boolean loginSuccess = accountDAO.login(email, password);
+
+            // Prepare the response based on login success
             jsonResponse.addProperty("success", loginSuccess);
             if (loginSuccess) {
-                Account account= accountDAO.getAccountByEmail(email);
-                jsonResponse.add("user",gson.toJsonTree(account));
+                // Get the user account details
+                Account account = accountDAO.getAccountByEmail(email);
+
+                // Convert the Account object (without password) to a JSON string
+                account.setPassword(null); // Exclude password from being added to the token
+                String accountJson = gson.toJson(account);
+
+                // Generate a JWT token using the existing method (with the account data string)
+                String jwtToken = JwtUtil.generateToken(accountJson);
+
+                jsonResponse.addProperty("jwtToken", jwtToken);
+                JsonObject user = new JsonObject();
+                user.addProperty("name", account.getName());
+                user.addProperty("email", account.getEmail());
+                user.addProperty("avatar", account.getAvatar());
+
+                // Add the user object to the response
+                jsonResponse.add("user", user);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,6 +69,7 @@ public class LoginController extends HttpServlet {
             jsonResponse.addProperty("message", "An error occurred during login");
         }
 
+        // Send the JSON response
         response.getWriter().write(gson.toJson(jsonResponse));
         response.getWriter().flush();
     }
