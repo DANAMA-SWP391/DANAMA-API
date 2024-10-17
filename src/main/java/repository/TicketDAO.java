@@ -139,8 +139,8 @@ public class TicketDAO extends DBContext {
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
                 "WHERE c.cinemaId = ? " +
-                "AND MONTH(st.showdate) = MONTH(CURRENT_DATE()) " +
-                "AND YEAR(st.showdate) = YEAR(CURRENT_DATE())";
+                "AND MONTH(st.showdate) = MONTH(GETDATE()) " +
+                "AND YEAR(st.showdate) = YEAR(GETDATE())";  // Use GETDATE() for SQL Server
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -230,12 +230,13 @@ public class TicketDAO extends DBContext {
 
     public static void main(String[] args) {
         TicketDAO dao = new TicketDAO();
-        System.out.println(dao.getTicketByBooking(1));
-
-
-        ArrayList arr = dao.getTicketsSoldPerMonth(1);
-        for(Object o: arr) {
-            System.out.println(o);
+//        System.out.println(dao.getTicketByBooking(1));
+//
+//
+//        ArrayList arr = dao.getTicketsSoldPerMonth(1);
+//        for(Object o: arr) {
+//            System.out.println(o);
+//        System.out.println(dao.getTicketSoldInCurrentMonth(1));
         }
     }
-}
+
