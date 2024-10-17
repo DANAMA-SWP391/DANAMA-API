@@ -47,25 +47,49 @@ public class MovieController extends HttpServlet {
         MovieDAO dao = new MovieDAO();
         boolean result = false;
 
-        switch (action) {
-            case "add":
-                Movie movie = gson.fromJson(jsonObject.get("movie"), Movie.class);
-                result = dao.addMovie(movie);
-                System.out.println(movie);
-                break;
-            case "delete":
-                Movie movieDelete = gson.fromJson(jsonObject.get("movie"), Movie.class);
-                result = dao.deleteMovie(movieDelete.getMovieId());
-                break;
-            case "update":
-                Movie movieUpdate = gson.fromJson(jsonObject.get("movie"), Movie.class);
-                result = dao.updateMovieByID(movieUpdate.getMovieId(), movieUpdate);
-        }
+        try {
+            switch (action) {
+                case "add":
+                    Movie movie = gson.fromJson(jsonObject.get("movie"), Movie.class);
+                    result = dao.addMovie(movie);
+                    System.out.println("Add movie result: " + result);
+                    break;
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"success\":" + result + "}");
-        response.getWriter().flush();
-        response.getWriter().close();
+                case "delete":
+                    int movieIdDelete = jsonObject.get("movie").getAsJsonObject().get("movieId").getAsInt();
+                    result = dao.deleteMovie(movieIdDelete);
+                    if (!result) {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().write("{\"error\": \"Movie not found\"}");
+                        return;
+                    }
+                    break;
+
+                case "update":
+                    Movie movieUpdate = gson.fromJson(jsonObject.get("movie"), Movie.class);
+                    result = dao.updateMovieByID(movieUpdate.getMovieId(), movieUpdate);
+                    if (!result) {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().write("{\"error\": \"Movie not found or update failed\"}");
+                        return;
+                    }
+                    break;
+
+                default:
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("{\"error\": \"Invalid action\"}");
+                    return;
+            }
+
+            response.getWriter().write("{\"success\":" + result + "}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+        } finally {
+            response.getWriter().flush();
+            response.getWriter().close();
+        }
     }
 }
