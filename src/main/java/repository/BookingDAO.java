@@ -118,7 +118,8 @@ public class BookingDAO extends DBContext {
                 "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
                 "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
-                "WHERE c.cinemaId = ?";
+                "WHERE c.cinemaId = ? " +
+                "GROUP BY b.bookingId, b.totalcost, b.timestamp, b.UID, b.status";
 
 
         try {
@@ -235,7 +236,7 @@ public class BookingDAO extends DBContext {
         double totalCost = 0.0;
 
         // SQL query to get the sum of totalCost for bookings made today for a specific cinema
-        String sql = "SELECT SUM(b.totalCost) as dailyTotal FROM Booking b " +
+        String sql = "SELECT SUM(DISTINCT b.totalCost) as dailyTotal FROM Booking b " +
                 "JOIN Ticket t ON b.bookingId = t.bookingId " +
                 "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
@@ -268,7 +269,7 @@ public class BookingDAO extends DBContext {
 
     public double getTotalCostInCurrentMonthByCinema(int cinemaId) {
 
-        String sql = "SELECT SUM(b.totalCost) as monthlyTotal FROM Booking b " +
+        String sql = "SELECT SUM(DISTINCT b.totalCost) as monthlyTotal FROM Booking b " +
                 "JOIN Ticket t ON b.bookingId = t.bookingId " +
                 "JOIN Showtime st ON t.showtimeId = st.showtimeId " +
                 "JOIN Room r ON st.roomId = r.roomId " +
