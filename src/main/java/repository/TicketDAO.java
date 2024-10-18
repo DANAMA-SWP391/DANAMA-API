@@ -237,6 +237,7 @@ public class TicketDAO extends DBContext {
 //        for(Object o: arr) {
 //            System.out.println(o);
 //        System.out.println(dao.getTicketSoldInCurrentMonth(1));
+        System.out.println(System.getenv("AZURE_STORAGE_CONNECTION_STRING"));
         }
     }
 

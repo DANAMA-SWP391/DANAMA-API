@@ -27,7 +27,7 @@ public class FileUploadController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Part filePart = request.getPart("file"); // Retrieves the file from the request
-
+        System.out.println(CONNECTION_STRING);
         if (filePart == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file uploaded");
             return;
