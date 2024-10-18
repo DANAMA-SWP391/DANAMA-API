@@ -52,6 +52,21 @@ public class AccountController extends HttpServlet {
             case "view":
                 Account viewAccount = gson.fromJson(jsonObject.get("account"), Account.class);
                 Account accountDetails = dao.getAccountById(viewAccount.getUID());
+
+                JsonObject jsonResponse = new JsonObject();
+
+                if (accountDetails != null) {
+                    jsonResponse.addProperty("success", true);
+                    jsonResponse.add("accountDetails", gson.toJsonTree(accountDetails)); // Thêm chi tiết tài khoản vào JSON
+                } else {
+                    jsonResponse.addProperty("success", false);
+                    jsonResponse.addProperty("message", "Account not found.");
+                }
+
+                response.setContentType("application/json");
+                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().flush();
+                response.getWriter().close();
                 break;
             case "ban":
                 Account accountBan = gson.fromJson(jsonObject.get("account"), Account.class);
