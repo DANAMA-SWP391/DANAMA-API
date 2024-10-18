@@ -21,7 +21,7 @@ import java.util.UUID;
 @WebServlet(name = "FileUploadController", value = "/uploadFileToAzure")
 public class FileUploadController extends HttpServlet {
     // Azure Blob storage details
-    private static final String CONNECTION_STRING = System.getenv("AZURE_STORAGE_CONNECTION_STRING");
+    private static final String CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=danama;AccountKey=gEXYPjyiLxWlFdVKA2yN90jwJ+uCeajq+mA1WCOlanYnjq4ZQ6ydnr6RPL46liWnOA5LIT2AQ04A+AStoPBpQQ==;EndpointSuffix=core.windows.net";
     private static final String CONTAINER_NAME = "images";
 
     @Override
