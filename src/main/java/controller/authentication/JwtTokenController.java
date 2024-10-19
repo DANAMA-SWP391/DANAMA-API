@@ -8,6 +8,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.Account;
+import repository.AccountDAO;
 import utils.JwtUtil;
 
 import java.io.IOException;
@@ -38,11 +40,11 @@ public class JwtTokenController extends HttpServlet {
 
             if (claims != null && !JwtUtil.isTokenExpired(claims)) {
                 // If the token is valid and not expired
-                String accountJson = claims.getSubject(); // 'sub' contains the Account data JSON string
-
+                String email = claims.getSubject(); // 'sub' contains the Account data JSON string
+                Account account = new AccountDAO().getAccountByEmail(email);
                 // Add account data to the response
                 jsonResponse.addProperty("success", true);
-                jsonResponse.add("user", gson.fromJson(accountJson, JsonObject.class));
+                jsonResponse.add("user", gson.toJsonTree(account));
             } else {
                 // If the token is invalid or expired
                 jsonResponse.addProperty("success", false);

@@ -9,7 +9,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Account;
+import model.Cinema;
 import repository.AccountDAO;
+import repository.CinemaDAO;
 import utils.JwtUtil;
 
 import java.io.IOException;
@@ -49,16 +51,19 @@ public class LoginController extends HttpServlet {
 
                 // Convert the Account object (without password) to a JSON string
                 account.setPassword(null); // Exclude password from being added to the token
-                String accountJson = gson.toJson(account);
+                if(account.getRoleId()==2) {
+                    Cinema cinema= new CinemaDAO().getCinemaByUId(account.getUID());
+                    jsonResponse.add("cinema",gson.toJsonTree(cinema));
+                }
 
                 // Generate a JWT token using the existing method (with the account data string)
-                String jwtToken = JwtUtil.generateToken(accountJson);
+                String jwtToken = JwtUtil.generateToken(account.getEmail());
 
                 jsonResponse.addProperty("jwtToken", jwtToken);
                 JsonObject user = new JsonObject();
                 user.addProperty("name", account.getName());
-                user.addProperty("email", account.getEmail());
                 user.addProperty("avatar", account.getAvatar());
+                user.addProperty("roleId", account.getRoleId());
 
                 // Add the user object to the response
                 jsonResponse.add("user", user);
