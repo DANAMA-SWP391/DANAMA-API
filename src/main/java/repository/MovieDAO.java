@@ -312,20 +312,44 @@ public class MovieDAO extends DBContext {
         }
     }
 
-    public boolean deleteMovie(int movieId) {
-        String sql = "DELETE FROM Movie WHERE movieId = ?";
+//    public boolean deleteMovie(int movieId) {
+//        String sql = "DELETE FROM Movie WHERE movieId = ?";
+//
+//        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+//            ps.setInt(1, movieId);
+//
+//            int rowsAffected = ps.executeUpdate();
+//            return rowsAffected > 0;
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+public boolean deleteMovie(int movieId) {
+    // Câu lệnh xóa các thể loại liên quan từ bảng MovieGenre trước
+    String deleteGenresSql = "DELETE FROM MovieGenre WHERE movieId = ?";
+    String deleteMovieSql = "DELETE FROM Movie WHERE movieId = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, movieId);
-
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+    try {
+        // Xóa các thể loại của phim trước khi xóa phim
+        try (PreparedStatement psDeleteGenres = connection.prepareStatement(deleteGenresSql)) {
+            psDeleteGenres.setInt(1, movieId);
+            psDeleteGenres.executeUpdate();
         }
+
+        // Xóa phim
+        try (PreparedStatement psDeleteMovie = connection.prepareStatement(deleteMovieSql)) {
+            psDeleteMovie.setInt(1, movieId);
+            int rowsAffected = psDeleteMovie.executeUpdate();
+            return rowsAffected > 0;
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
     }
+}
     public ArrayList<Movie> getTop5MostWatchedMovies() {
         ArrayList<Movie> topMovies = new ArrayList<>();
         String sql = "SELECT TOP 5 m.movieId, COUNT(t.ticketId) AS ticketCount " +
