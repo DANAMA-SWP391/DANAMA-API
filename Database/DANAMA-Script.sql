@@ -72,7 +72,6 @@ CREATE TABLE Cinema (
 CREATE TABLE Room (
     roomId INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(255),
-    numberOfSeat INT,
     cinemaId INT,
     FOREIGN KEY (cinemaId) REFERENCES Cinema(cinemaId)
 );
@@ -97,7 +96,6 @@ CREATE TABLE Showtime (
     baseprice DECIMAL(10, 2),
     movieId INT,
     roomId INT,
-	seatAvailable INT,
     status INT,
     FOREIGN KEY (movieId) REFERENCES Movie(movieId),
     FOREIGN KEY (roomId) REFERENCES Room(roomId)
