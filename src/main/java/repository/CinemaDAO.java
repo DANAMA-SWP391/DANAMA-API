@@ -76,6 +76,36 @@ public class CinemaDAO extends DBContext {
 
         return cinema;
     }
+    public Cinema getCinemaByUId(int uid) {
+        Cinema cinema = null;
+
+        String sql = "SELECT cinemaId, name, logo, address, description, image, managerId FROM Cinema WHERE managerId = ?";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, uid);  // Set the cinemaId parameter
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                cinema = new Cinema();
+                cinema.setCinemaId(resultSet.getInt("cinemaId"));
+                cinema.setName(resultSet.getString("name"));
+                cinema.setLogo(resultSet.getString("logo"));
+                cinema.setAddress(resultSet.getString("address"));
+                cinema.setDescription(resultSet.getString("description"));
+                cinema.setImage(resultSet.getString("image"));
+                cinema.setManagerId(resultSet.getInt("managerId"));
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return cinema;
+    }
 
     public boolean updateCinema(Cinema cinema) {
         String sql = "UPDATE Cinema SET name = ?, logo = ?, address = ?, description = ?, image = ?, managerId = ? WHERE cinemaId = ?";

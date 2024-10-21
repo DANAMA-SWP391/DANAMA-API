@@ -25,19 +25,17 @@ public class DashBoardController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        //Top5Movies
         Gson gson = new Gson();
+        JsonObject responseObject = new JsonObject();
+
+        // Fetch Top 5 Movies
         MovieDAO movieDAO = new MovieDAO();
         ArrayList<Movie> movies = movieDAO.getTop5MostWatchedMovies();
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.add("movies", gson.toJsonTree(movies));
-        String json = gson.toJson(jsonObject);
-        response.getWriter().println(json);
+        responseObject.add("movies", gson.toJsonTree(movies));
 
-        //MostPopular_Showtime
+        // Fetch Most Popular Showtimes
         ShowTimeDAO showTimeDAO = new ShowTimeDAO();
         List<Object[]> popularShowtimes = showTimeDAO.getMostPopularShowtimes_Admin();
-        JsonObject jsonPopularSlot = new JsonObject();
         List<JsonObject> showtimesList = new ArrayList<>();
         for (Object[] showtime : popularShowtimes) {
             JsonObject showtimeJson = new JsonObject();
@@ -48,30 +46,29 @@ public class DashBoardController extends HttpServlet {
             showtimeJson.addProperty("endTime", ((Time) showtime[4]).toString());
             showtimesList.add(showtimeJson);
         }
-        jsonPopularSlot.add("popularShowtimes", gson.toJsonTree(showtimesList));
-        String jsonResponse = gson.toJson(jsonPopularSlot);
-        response.getWriter().println(jsonResponse);
+        responseObject.add("popularShowtimes", gson.toJsonTree(showtimesList));
 
-        //Total_Revenue
+        // Fetch Total Revenue for All Cinemas
         CinemaDAO cinemaDAO = new CinemaDAO();
-        List<Object[]> GetRevenue = cinemaDAO.getTotalRevenueForAllCinemas_Admin();
-        JsonObject jsonGetRevenue = new JsonObject();
-        List<JsonObject> GetRevenueList = new ArrayList<>();
-        for (Object[] revenue : GetRevenue) {
-            JsonObject cinemaJson = new JsonObject();
-            cinemaJson.addProperty("cinemaName", (String) revenue[0]);
-            cinemaJson.addProperty("totalRevenue", (Double) revenue[1]);
-
-            GetRevenueList.add(cinemaJson);
+        List<Object[]> revenueList = cinemaDAO.getTotalRevenueForAllCinemas_Admin();
+        List<JsonObject> revenueJsonList = new ArrayList<>();
+        for (Object[] revenue : revenueList) {
+            JsonObject revenueJson = new JsonObject();
+            revenueJson.addProperty("cinemaName", (String) revenue[0]);
+            revenueJson.addProperty("totalRevenue", (Double) revenue[1]);
+            revenueJsonList.add(revenueJson);
         }
-        jsonGetRevenue.add("cinemaRevenues", gson.toJsonTree(GetRevenueList));
-        String jsonResponsee = gson.toJson(jsonGetRevenue);
-        response.getWriter().println(jsonResponsee);
+        responseObject.add("cinemaRevenues", gson.toJsonTree(revenueJsonList));
 
+        // Send a single JSON response
+        String jsonResponse = gson.toJson(responseObject);
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
+        response.getWriter().close();
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        // Implement POST logic if needed
     }
 }
