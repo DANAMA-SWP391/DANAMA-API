@@ -11,7 +11,6 @@ import model.Cinema;
 
 
 import context.DBContext;
-import model.Showtime;
 
 
 public class RoomDAO extends DBContext {
@@ -140,10 +139,7 @@ public class RoomDAO extends DBContext {
     }
     public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
         ArrayList<Room> rooms = new ArrayList<Room>();
-        String query = "SELECT r.roomId, r.name, r.numberOfSeat, c.cinemaId, c.name, c.logo, c.address, c.description, c.image, c.managerId " +
-                "FROM Room r " +
-                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
-                "WHERE r.cinemaId = ?";
+        String query = "SELECT roomId, name, cinemaId FROM Room WHERE cinemaId=? ";
         try {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, cinemaId);
@@ -154,8 +150,8 @@ public class RoomDAO extends DBContext {
                 room.setName(rs.getString("name"));
                 room.setNumberOfSeat(getNumberOfSeatsByRoom(room.getRoomId()));
 
-                CinemaDAO cinemaDAO = new CinemaDAO();
-                Cinema cinema = cinemaDAO.getCinemaById(rs.getInt("cinemaId"));
+                Cinema cinema = new Cinema();
+                cinema.setCinemaId(rs.getInt("cinemaId"));
                 room.setCinema(cinema);
                 rooms.add(room);
             }
