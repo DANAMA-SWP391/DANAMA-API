@@ -94,7 +94,7 @@ public class RoomDAO extends DBContext {
         Room room = null;
 
         String sql = "SELECT roomId, name, cinemaId FROM Room WHERE roomId=? ";
-
+        CinemaDAO cinemaDAO = new CinemaDAO();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, roomId);
@@ -107,7 +107,7 @@ public class RoomDAO extends DBContext {
                 room.setNumberOfSeat(getNumberOfSeatsByRoom(room.getRoomId()));
 
                 // Fetch the Cinema details using the cinemaId
-                CinemaDAO cinemaDAO = new CinemaDAO();
+
                 Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
                 room.setCinema(cinema);
             }

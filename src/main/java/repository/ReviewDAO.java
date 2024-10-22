@@ -96,7 +96,7 @@ public class ReviewDAO extends DBContext {
 
     public boolean updateReview(Review review) {
 
-        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ?, UID = ?, movieId = ? WHERE reviewId = ?";
+        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ?WHERE reviewId = ?";
         PreparedStatement statement = null;
 
         try {
@@ -107,9 +107,7 @@ public class ReviewDAO extends DBContext {
             statement.setInt(1, review.getRating());
             statement.setString(2, review.getComment());
             statement.setDate(3, new Date(review.getDate().getTime()));
-            statement.setInt(4, review.getUid());
-            statement.setInt(5, review.getMovieId());
-            statement.setInt(6, review.getReviewId());
+            statement.setInt(4, review.getReviewId());
 
             // Execute the update
             statement.executeUpdate();
