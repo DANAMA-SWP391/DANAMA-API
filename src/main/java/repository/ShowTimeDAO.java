@@ -261,7 +261,7 @@ public class ShowTimeDAO extends DBContext {
                     "FROM Showtime s " +
                     "LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
                     "WHERE s.roomId IN (SELECT roomId FROM Room WHERE cinemaId = ?) " +
-                    "GROUP BY s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.seatAvailable " +
+                    "GROUP BY s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId " +
                     "ORDER BY ticketCount DESC";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -481,6 +481,6 @@ public class ShowTimeDAO extends DBContext {
 //        for(Showtime s: dao.getListShowtimes()) {
 //            System.out.println(s.getSeatAvailable());
 //        }
-        System.out.println(dao.getShowtimeById(1));
+        System.out.println(dao.getTop5PopularShowtimesInCinema(1));
     }
 }
