@@ -81,17 +81,17 @@ public class LoginGoogleController extends HttpServlet {
                 }
             }
 
-            Account user = accountDAO.getAccountByGoogleId(googleId);
-            String jwtToken = JwtUtil.generateToken(gson.toJson(user));
-            System.out.println("Generate:"+jwtToken);
+            Account account = accountDAO.getAccountByGoogleId(googleId);
+            String jwtToken = JwtUtil.generateToken(account.getEmail());
+
             responseData.addProperty("jwtToken", jwtToken);
-            JsonObject userJson = new JsonObject();
-            userJson.addProperty("name", user.getName());
-            userJson.addProperty("email", user.getEmail());
-            userJson.addProperty("avatar", user.getAvatar());
+            JsonObject user = new JsonObject();
+            user.addProperty("name", account.getName());
+            user.addProperty("avatar", account.getAvatar());
+            user.addProperty("roleId", account.getRoleId());
             responseData.addProperty("success", true);
             // Add the user object to the response
-            responseData.add("user", userJson);
+            responseData.add("user", user);
 
             response.getWriter().write(gson.toJson(responseData));
             response.getWriter().flush();
