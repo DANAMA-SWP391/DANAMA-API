@@ -450,8 +450,9 @@ public class ShowTimeDAO extends DBContext {
 //        }
 //        System.out.println(dao.getShowtimeById(1));
 //        System.out.println(dao.getMostPopularTimeSlotInCinema(1));
-        for(Showtime s: dao.getTop5PopularShowtimesInCinema(1)) {
-            System.out.println(s);
+//        for(Showtime s: dao.getTop5PopularShowtimesInCinema(1)) {
+            System.out.println(dao.getMostPopularTimeSlotInCinema(1));
         }
     }
-}
+
+

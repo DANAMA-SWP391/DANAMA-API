@@ -7,14 +7,11 @@ package repository;
 import context.DBContext;
 import model.Genre;
 import model.Movie;
-import java.text.SimpleDateFormat;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class MovieDAO extends DBContext {
     private GenreDAO genreDAO = new GenreDAO(); // Sử dụng GenreDAO để lấy genres
@@ -321,6 +318,35 @@ public class MovieDAO extends DBContext {
 
         return topMovies;
     }
+    public ArrayList<Movie> getTop5MostWatchedMoviesByCinemaId(int cinemaId) {
+        ArrayList<Movie> topMovies = new ArrayList<>();
+        String sql = "SELECT TOP 5 m.movieId, COUNT(t.ticketId) AS ticketCount " +
+                "FROM Movie m " +
+                "JOIN Showtime s ON m.movieId = s.movieId " +
+                "JOIN Room r ON s.roomId = r.roomId " +
+                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
+                "JOIN Ticket t ON s.showtimeId = t.showtimeId " +  // Change LEFT JOIN to INNER JOIN
+                "WHERE c.cinemaId = ? " +
+                "GROUP BY m.movieId " +
+                "ORDER BY ticketCount DESC";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, cinemaId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    int movieId = resultSet.getInt("movieId");
+                    Movie movie = getMovieById(movieId);
+                    if (movie != null) {
+                        topMovies.add(movie);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return topMovies;
+    }
     public List<Object[]> getMostWatchedMovies_Admin() {
         List<Object[]> movies = new ArrayList<>();
 
@@ -374,11 +400,51 @@ public class MovieDAO extends DBContext {
         return movies;
     }
 
+    public ArrayList<Map<String, Object>> getTicketSoldAndTotalCost(int cinemaId) {
+        ArrayList<Map<String, Object>> movieRevenues = new ArrayList<>();
+        String sql = "SELECT m.movieId, m.name, COUNT(t.ticketId) AS ticketSold, SUM(t.price) AS totalRevenue " +
+                "FROM Movie m " +
+                "JOIN Showtime s ON m.movieId = s.movieId " +
+                "JOIN Room r ON s.roomId = r.roomId " +
+                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
+                "JOIN Ticket t ON s.showtimeId = t.showtimeId " +
+                "WHERE c.cinemaId = ? " +
+                "GROUP BY m.movieId, m.name " +
+                "ORDER BY totalRevenue DESC";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, cinemaId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Map<String, Object> movieData = new HashMap<>();
+                    movieData.put("movieId", resultSet.getInt("movieId"));
+                    movieData.put("movieName", resultSet.getString("name"));
+                    movieData.put("ticketSold", resultSet.getInt("ticketSold"));
+                    movieData.put("totalRevenue", resultSet.getDouble("totalRevenue"));
+
+                    movieRevenues.add(movieData);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return movieRevenues;
+    }
+
     // Test method
     public static void main(String[] args) {
         MovieDAO movieDAO = new MovieDAO();
-        for(Movie movie : movieDAO.getTop5MostWatchedMovies()) {
-            System.out.println(movie.getName());
+//        for(Movie movie : movieDAO.getTop5MostWatchedMoviesByCinemaId(1)) {
+//            System.out.println(movie.getName());
+//        }
+        ArrayList<Map<String, Object>> result = movieDAO.getTicketSoldAndTotalCost(2);
+        for (Map<String, Object> movieData : result) {
+            System.out.println("Movie ID: " + movieData.get("movieId"));
+            System.out.println("Movie Name: " + movieData.get("movieName"));
+            System.out.println("Tickets Sold: " + movieData.get("ticketSold"));
+            System.out.println("Total Revenue: " + movieData.get("totalRevenue"));
+            System.out.println("----------------------------");
         }
     }
 }
