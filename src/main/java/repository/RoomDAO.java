@@ -29,8 +29,8 @@ public class RoomDAO extends DBContext {
                 room.setRoomId(resultSet.getInt("roomId"));
                 room.setName(resultSet.getString("name"));
                 room.setNumberOfSeat(getNumberOfSeatsByRoom(room.getRoomId()));
-                CinemaDAO cinemaDAO = new CinemaDAO();
-                Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
+                Cinema cinema = new Cinema();
+                cinema.setCinemaId(resultSet.getInt("cinemaId"));
                 room.setCinema(cinema);
                 rooms.add(room);
             }
@@ -108,7 +108,8 @@ public class RoomDAO extends DBContext {
 
                 // Fetch the Cinema details using the cinemaId
 
-                Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
+                Cinema cinema = new Cinema();
+                cinema.setCinemaId(resultSet.getInt("cinemaId"));
                 room.setCinema(cinema);
             }
 
