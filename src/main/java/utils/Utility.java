@@ -4,18 +4,24 @@
  */
 package utils;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
+import com.google.gson.*;
 
+import java.lang.reflect.Type;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 public class Utility {
 
+    public static class TimeSerializer implements JsonSerializer<Time> {
+        private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
+        @Override
+        public JsonElement serialize(Time src, Type typeOfSrc, JsonSerializationContext context) {
+            // Format the time to "HH:mm:ss" before serializing
+            return new JsonPrimitive(TIME_FORMAT.format(src));
+        }
+    }
     public static class TimeDeserializer implements JsonDeserializer<Time> {
 
         @Override

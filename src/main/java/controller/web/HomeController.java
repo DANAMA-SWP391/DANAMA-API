@@ -1,5 +1,6 @@
 package controller.web;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,8 +13,10 @@ import model.Showtime;
 import repository.CinemaDAO;
 import repository.MovieDAO;
 import repository.ShowTimeDAO;
+import utils.Utility;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.List;
 
 public class HomeController extends HttpServlet {
@@ -23,16 +26,16 @@ public class HomeController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         JsonObject responseData = new JsonObject();
-        Gson gson = new Gson();
+        Gson gson =  new GsonBuilder()
+                .registerTypeAdapter(Time.class, new Utility.TimeSerializer())  // Register the custom Time serializer
+                .create();
         MovieDAO movieDAO = new MovieDAO();
-        List<Movie> nowPlayingMovies = movieDAO.getNowPlayingMovies();
-        List<Movie> comingSoonMovies = movieDAO.getComingSoonMovies();
+        List<Movie> movies= movieDAO.getAllMovieList();
         ShowTimeDAO showTimeDAO = new ShowTimeDAO();
         List<Showtime> showtimes= showTimeDAO.getListShowtimes();
         CinemaDAO cinemaDAO = new CinemaDAO();
         List<Cinema> cinemas= cinemaDAO.getListCinemas();
-        responseData.add("nowPlayingMovies",gson.toJsonTree(nowPlayingMovies));
-        responseData.add("comingSoonMovies",gson.toJsonTree(comingSoonMovies));
+        responseData.add("movies", gson.toJsonTree(movies));
         responseData.add("showtimes",gson.toJsonTree(showtimes));
         responseData.add("cinemas",gson.toJsonTree(cinemas));
         String json = gson.toJson(responseData);
