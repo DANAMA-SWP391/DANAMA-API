@@ -42,14 +42,14 @@ public class DashBoardController extends HttpServlet {
         ArrayList<Integer> ticketsoldpermonth = ticketDAO.getTicketsSoldPerMonth(cinemaId);
         double dailytotalrevenue = bookingDAO.getDailyTotalCostByCinema(cinemaId);
         double monthtotalrevenue = bookingDAO.getTotalCostInCurrentMonthByCinema(cinemaId);
-        String populartimeslot = showtimeDAO.getMostPopularTimeSlotInCinema(cinemaId);
+//        String populartimeslot = showtimeDAO.getMostPopularTimeSlotInCinema(cinemaId);
         ArrayList<Map<String, Object>> ticketsoldandtotalcosteachmovie= movieDAO.getTicketSoldAndTotalCost(cinemaId);
 
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("dailytotalrevenue", dailytotalrevenue);
         jsonObject.addProperty("monthtotalrevenue", monthtotalrevenue);
-        jsonObject.addProperty("populartimeslot", populartimeslot);
+//        jsonObject.addProperty("populartimeslot", populartimeslot);
         jsonObject.addProperty("ticketsoldincurrentmonth", ticketsoldincurrentmonth);
         jsonObject.add("ticketsoldpermonth", gson.toJsonTree(ticketsoldpermonth));
         jsonObject.add("popularmovies", gson.toJsonTree(popularmovies));
