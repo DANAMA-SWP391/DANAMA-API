@@ -7,29 +7,28 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.Booking;
 import repository.BookingDAO;
 
 import java.io.IOException;
 
-@WebServlet(name = "PaymentController", value = "/payment")
-public class PaymentController extends HttpServlet {
+@WebServlet(name = "PaymentController", value = "/checkPaymentStatus")
+public class CheckPaymentController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doPost(request,response);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        int bookingId= Integer.parseInt(request.getParameter("bookingId"));
+        BookingDAO bookingDAO = new BookingDAO();
+        Booking booking = bookingDAO.getBookingById(bookingId);
+        boolean success = (booking.getStatus()==1);
+        System.out.println(success);
+        response.getWriter().write("{\"success\":" + success + "}");
+        response.getWriter().flush();
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        Gson gson = new Gson();
-        JsonObject data= gson.fromJson(request.getReader(), JsonObject.class);
-        System.out.println(data);
-        int bookingId= data.get("bookingId").getAsInt();
-        BookingDAO bookingDAO = new BookingDAO();
-        boolean success = bookingDAO.paymentConfirm(bookingId);
-        System.out.println(success);
-        response.getWriter().write("{\"success\":" + success + "}");
-        response.getWriter().flush();
+        doGet(request, response);
     }
 }
