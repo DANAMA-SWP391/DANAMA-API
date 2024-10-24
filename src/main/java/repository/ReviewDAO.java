@@ -47,7 +47,10 @@ public class ReviewDAO extends DBContext {
     // Method to get reviews by movieId
     public List<Review> getReviewByMovie(String movieId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT * FROM Review WHERE movieId = ?";
+        String sql = "SELECT r.*, a.name as reviewer, a.avatar as avatar " +
+                "FROM Review r " +
+                "JOIN Account a ON r.UID = a.UID " +
+                "WHERE r.movieId = ?";
         PreparedStatement statement = null;
         ResultSet rs = null;
 
@@ -63,15 +66,15 @@ public class ReviewDAO extends DBContext {
 
             // Duyệt qua từng dòng kết quả
             while (rs.next()) {
-                int reviewId = rs.getInt("reviewId");
-                int rating = rs.getInt("rating");
-                String comment = rs.getString("comment");
-                Date date = rs.getDate("date");
-                int UID = rs.getInt("UID");
-                int movie_Id = rs.getInt("movieId");
-
-                // Tạo đối tượng Review từ dữ liệu truy vấn được
-                Review review = new Review(reviewId, rating, comment, date, UID, movie_Id);
+                Review review = new Review();
+                review.setReviewId(rs.getInt("reviewId"));
+                review.setRating(rs.getInt("rating"));
+                review.setComment(rs.getString("comment"));
+                review.setDate(rs.getDate("date"));
+                review.setUid(rs.getInt("UID"));
+                review.setMovieId(Integer.parseInt(movieId));
+                review.setReviewer(rs.getString("reviewer"));
+                review.setAvatar(rs.getString("avatar"));
 
                 // Thêm review vào danh sách
                 reviews.add(review);
@@ -90,9 +93,10 @@ public class ReviewDAO extends DBContext {
 
         return reviews;
     }
+
     public boolean updateReview(Review review) {
 
-        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ?, UID = ?, movieId = ? WHERE reviewId = ?";
+        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ?WHERE reviewId = ?";
         PreparedStatement statement = null;
 
         try {
@@ -103,9 +107,7 @@ public class ReviewDAO extends DBContext {
             statement.setInt(1, review.getRating());
             statement.setString(2, review.getComment());
             statement.setDate(3, new Date(review.getDate().getTime()));
-            statement.setInt(4, review.getUid());
-            statement.setInt(5, review.getMovieId());
-            statement.setInt(6, review.getReviewId());
+            statement.setInt(4, review.getReviewId());
 
             // Execute the update
             statement.executeUpdate();
