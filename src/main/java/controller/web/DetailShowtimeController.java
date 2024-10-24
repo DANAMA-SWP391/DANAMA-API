@@ -37,16 +37,20 @@ public class DetailShowtimeController extends HttpServlet {
                 .create();
         JsonObject data = gson.fromJson(request.getReader(), JsonObject.class);
         int showtimeId = data.get("showtimeId").getAsInt();
-        ShowTimeDAO showTimeDAO= new ShowTimeDAO();
-        Showtime showtime = showTimeDAO.getShowtimeById(showtimeId);
+        int roomId = data.get("roomId").getAsInt();
         SeatDAO seatDAO = new SeatDAO();
-        List<Seat> seats= seatDAO.getListSeatsInRoom(showtime.getRoom().getRoomId());
+        List<Seat> seats= seatDAO.getListSeatsInRoom(roomId);
         TicketDAO ticketDAO = new TicketDAO();
         List<Ticket> tickets = ticketDAO.getTicketListOfShowtime(showtimeId);
+        for(Seat seat : seats) {
+            for(Ticket ticket : tickets) {
+                if(seat.getSeatId()==ticket.getSeat().getSeatId()) {
+                    seat.setType("Booked");
+                }
+            }
+        }
         JsonObject responseData = new JsonObject();
-        responseData.add("showtime", gson.toJsonTree(showtime));
         responseData.add("seats", gson.toJsonTree(seats));
-        responseData.add("tickets", gson.toJsonTree(tickets));
         String json = gson.toJson(responseData);
         response.getWriter().println(json);
         response.getWriter().flush();

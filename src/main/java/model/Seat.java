@@ -40,6 +40,10 @@ public class Seat {
         return seatNum;
     }
 
+    public void setSeatId(int seatId) {
+        this.seatId = seatId;
+    }
+
     public void setSeatNum(String seatNum) {
         this.seatNum = seatNum;
     }
