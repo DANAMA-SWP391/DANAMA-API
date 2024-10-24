@@ -228,7 +228,19 @@ public class TicketDAO extends DBContext {
 
         return ticketData;
     }
+    public boolean deleteTicket(int ticketId) {
+        String sql = "DELETE FROM Ticket WHERE ticketId = ?";
 
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, ticketId);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            return rowsAffected > 0; // Return true if the ticket was successfully deleted
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Return false if an SQL error occurs
+        }
+    }
     public static void main(String[] args) {
         SeatDAO seatDAO = new SeatDAO();
         List<Seat> seats= seatDAO.getListSeatsInRoom(1);

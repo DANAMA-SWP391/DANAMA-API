@@ -20,4 +20,8 @@
         <servlet-name>ManagerDashBoardController</servlet-name>
         <url-pattern>/managerDashBoard</url-pattern>
     </servlet-mapping>
+    <listener>
+        <listener-class>repository.BookingCleanupListener</listener-class>
+    </listener>
+
 </web-app>

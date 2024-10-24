@@ -39,7 +39,8 @@ public class BookingController extends HttpServlet {
             success = false;
         }
         else {
-            booking= bookingDAO.getBookingByUserAndDate(booking.getUser().getUID(),booking.getTimestamp());
+            booking= bookingDAO.getNewestBookingByUser(booking.getUser().getUID());
+            responseData.addProperty("bookingId", booking.getBookingId());
             List<Ticket> tickets = new ArrayList<>();
             for(JsonElement ticket : ticketsJson){
                 Ticket t = gson.fromJson(ticket, Ticket.class);
@@ -52,9 +53,7 @@ public class BookingController extends HttpServlet {
                     success = false;
                 }
             }
-            tickets= ticketDAO.getTicketByBooking(booking.getBookingId());
-            responseData.add("booking", gson.toJsonTree(booking));
-            responseData.add("tickets", gson.toJsonTree(tickets));
+            success = true;
         }
         responseData.addProperty("success", success);
         String json = gson.toJson(responseData);
