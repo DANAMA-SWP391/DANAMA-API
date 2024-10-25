@@ -84,6 +84,7 @@ CREATE TABLE Seat (
     [row] INT,
     [type] VARCHAR(50),
     roomId INT,
+    status INT,
     FOREIGN KEY (roomId) REFERENCES Room(roomId)
 );
 
