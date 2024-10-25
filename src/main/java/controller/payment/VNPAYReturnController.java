@@ -6,7 +6,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import repository.BookingDAO;
 
 import java.io.IOException;
@@ -28,14 +27,15 @@ public class VNPAYReturnController extends HttpServlet {
         String bookingId = request.getParameter("vnp_TxnRef");
         String vnp_TransactionStatus = request.getParameter("vnp_TransactionStatus");
         JsonObject jsonObject = new JsonObject();
+        BookingDAO bookingDAO = new BookingDAO();
         // Update the payment status in the session
         if ("00".equals(vnp_TransactionStatus)) {
             // Payment successful
-            BookingDAO bookingDAO = new BookingDAO();
             boolean success= bookingDAO.paymentConfirm(Integer.parseInt(bookingId));
             jsonObject.addProperty("success", success);
         } else {
             // Payment failed
+            boolean success= bookingDAO.paymentFailed(Integer.parseInt(bookingId));
             jsonObject.addProperty("success", "false");
 
         }

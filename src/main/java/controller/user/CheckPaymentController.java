@@ -1,7 +1,5 @@
 package controller.user;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +9,7 @@ import model.Booking;
 import repository.BookingDAO;
 
 import java.io.IOException;
+import com.google.gson.JsonObject;
 
 @WebServlet(name = "PaymentController", value = "/checkPaymentStatus")
 public class CheckPaymentController extends HttpServlet {
@@ -18,12 +17,20 @@ public class CheckPaymentController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        int bookingId= Integer.parseInt(request.getParameter("bookingId"));
+
+        int bookingId = Integer.parseInt(request.getParameter("bookingId"));
         BookingDAO bookingDAO = new BookingDAO();
         Booking booking = bookingDAO.getBookingById(bookingId);
-        boolean success = (booking.getStatus()==1);
-        System.out.println(success);
-        response.getWriter().write("{\"success\":" + success + "}");
+
+        JsonObject jsonResponse = new JsonObject();
+        if (booking != null) {
+            int status = booking.getStatus();
+            jsonResponse.addProperty("status", status);  // Only include status in the response
+        } else {
+            jsonResponse.addProperty("error", "Booking not found");
+        }
+
+        response.getWriter().write(jsonResponse.toString());
         response.getWriter().flush();
     }
 

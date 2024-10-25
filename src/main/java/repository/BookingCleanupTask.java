@@ -13,7 +13,7 @@ public class BookingCleanupTask extends DBContext implements Runnable {
     public void run() {
         try {
             // Use connection from DBContext
-            String selectQuery = "SELECT bookingId, timestamp FROM Booking WHERE status = 0"; // Pending bookings
+            String selectQuery = "SELECT bookingId, timestamp FROM Booking WHERE status != 1"; // Pending bookings
             PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
             ResultSet resultSet = selectStatement.executeQuery();
 
