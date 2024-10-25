@@ -7,7 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import repository.BookingDAO;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -25,6 +25,7 @@ public class VNPAYPaymentController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String bookingId = request.getParameter("bookingId");
+        new BookingDAO().paymentPending(Integer.parseInt(bookingId));
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";

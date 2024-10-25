@@ -215,7 +215,38 @@ public class BookingDAO extends DBContext {
             return false; // Return false if there's an SQL exception
         }
     }
+    public boolean paymentPending(int bookingId) {
+        try {
+            String sql = "UPDATE Booking SET status = ? WHERE bookingId = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, 0); // Set the status to 0
+            preparedStatement.setInt(2, bookingId);
 
+            int rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean paymentFailed(int bookingId) {
+        try {
+            String sql = "UPDATE Booking SET status = ? WHERE bookingId = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, 2); // Set the status to 2
+            preparedStatement.setInt(2, bookingId);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public ArrayList<Booking> searchBookingByDate(Date timestamp) {
 
         ArrayList<Booking> bookings = new ArrayList<>();
