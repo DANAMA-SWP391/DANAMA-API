@@ -44,13 +44,13 @@ public class ReviewDAO extends DBContext {
         }
     }
 
-    // Method to get reviews by movieId
     public List<Review> getReviewByMovie(String movieId) {
         List<Review> reviews = new ArrayList<>();
         String sql = "SELECT r.*, a.name as reviewer, a.avatar as avatar " +
                 "FROM Review r " +
                 "JOIN Account a ON r.UID = a.UID " +
-                "WHERE r.movieId = ?";
+                "WHERE r.movieId = ? " +
+                "ORDER BY r.date DESC";  // Sort by date in descending order
         PreparedStatement statement = null;
         ResultSet rs = null;
 
@@ -93,6 +93,7 @@ public class ReviewDAO extends DBContext {
 
         return reviews;
     }
+
 
     public boolean updateReview(Review review) {
 
