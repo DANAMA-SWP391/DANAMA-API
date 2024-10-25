@@ -28,12 +28,9 @@ public class DetailMovieController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         int movieId= Integer.parseInt(request.getParameter("movieId"));
-        ShowTimeDAO showTimeDAO = new ShowTimeDAO();
-        ArrayList<Showtime> listShowtime= showTimeDAO.getShowtimeByMovie(movieId);
         ReviewDAO reviewDAO = new ReviewDAO();
         List<Review> listReview= reviewDAO.getReviewByMovie(Integer.toString(movieId));
         HashMap<String,Object> responseData = new HashMap<>();
-        responseData.put("showtimes",listShowtime);
         responseData.put("reviews",listReview);
         Gson gson = new Gson();
         String json = gson.toJson(responseData);

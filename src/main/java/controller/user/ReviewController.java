@@ -12,6 +12,7 @@ import model.Review;
 import repository.ReviewDAO;
 
 import java.io.IOException;
+import java.sql.Date;
 
 @WebServlet(name = "ReviewController", value = "/review")
 public class ReviewController extends HttpServlet {
@@ -39,11 +40,13 @@ public class ReviewController extends HttpServlet {
                 case "ADD":
                     Review review = gson.fromJson(jsonObject.get("review"), Review.class);
                     System.out.println(review);
+                    System.out.println(new Date(review.getDate().getTime()));
                     success = reviewDAO.addNewReview(review);
                     break;
                 case "UPDATE":
                     Review reviewUpdate = gson.fromJson(jsonObject.get("review"), Review.class);
                     success = reviewDAO.updateReview(reviewUpdate) ;
+                    System.out.println(new Date(reviewUpdate.getDate().getTime()));
                     break;
                 case "DELETE":
                     int reviewId = jsonObject.get("reviewId").getAsInt();

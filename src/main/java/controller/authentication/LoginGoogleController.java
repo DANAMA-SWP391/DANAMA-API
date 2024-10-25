@@ -69,7 +69,7 @@ public class LoginGoogleController extends HttpServlet {
                 newAccount.setEmail(email);
                 newAccount.setAvatar(avatar);
                 newAccount.setPhone(null);
-                newAccount.setRoleId(1);
+                newAccount.setRoleId(3);
                 newAccount.setPassword(null);
 
                 boolean accountAdded = accountDAO.addAccount(newAccount); // Add the new account

@@ -1,24 +1,22 @@
-
 package model;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class Review {
     private int reviewId;
     private int rating;
     private String comment;
-    private Date date;
+    private Timestamp date;  // Change to Timestamp
     private int uid;
     private String reviewer;
     private String avatar;
     private int movieId;
 
     // Default constructor
-    public Review() {
-    }
+    public Review() {}
 
     // Parameterized constructor
-    public Review(int reviewId, int rating, String comment, Date date, int uid, int movieId) {
+    public Review(int reviewId, int rating, String comment, Timestamp date, int uid, int movieId) {
         this.reviewId = reviewId;
         this.rating = rating;
         this.comment = comment;
@@ -27,7 +25,7 @@ public class Review {
         this.movieId = movieId;
     }
 
-    public Review(String avatar, int uid, int reviewId, String reviewer, int rating, int movieId, Date date, String comment) {
+    public Review(String avatar, int uid, int reviewId, String reviewer, int rating, int movieId, Timestamp date, String comment) {
         this.avatar = avatar;
         this.uid = uid;
         this.reviewId = reviewId;
@@ -37,8 +35,8 @@ public class Review {
         this.date = date;
         this.comment = comment;
     }
-    // Getters and Setters
 
+    // Getters and Setters
     public void setReviewId(int reviewId) {
         this.reviewId = reviewId;
     }
@@ -83,11 +81,11 @@ public class Review {
         this.comment = comment;
     }
 
-    public Date getDate() {
-        return date;
+    public Timestamp getDate() {
+        return this.date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(Timestamp date) {
         this.date = date;
     }
 
