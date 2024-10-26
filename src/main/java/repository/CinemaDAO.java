@@ -215,29 +215,58 @@ public class CinemaDAO extends DBContext {
         return totalRevenue;
     }
 
+//    public List<Object[]> getTotalRevenueForAllCinemas_Admin() {
+//        List<Object[]> cinemaRevenueList = new ArrayList<>();
+//
+//        String sql = "WITH CinemaRevenue AS (" +
+//                "    SELECT c.cinemaId, c.[name] AS cinemaName, SUM(t.price) AS totalRevenue " +
+//                "    FROM Cinema c " +
+//                "    LEFT JOIN Room r ON c.cinemaId = r.cinemaId " +
+//                "    LEFT JOIN Showtime s ON r.roomId = s.roomId " +
+//                "    LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
+//                "    GROUP BY c.cinemaId, c.[name] " +
+//                ") " +
+//                "SELECT cr.cinemaName, ISNULL(cr.totalRevenue, 0) AS totalRevenue " +
+//                "FROM CinemaRevenue cr " +
+//                "ORDER BY cr.totalRevenue DESC;";
+//
+//        try (PreparedStatement ps = connection.prepareStatement(sql);
+//             ResultSet rs = ps.executeQuery()) {
+//
+//            // Duyệt qua kết quả và thêm vào danh sách
+//            while (rs.next()) {
+//                String cinemaName = rs.getString("cinemaName");
+//                double totalRevenue = rs.getDouble("totalRevenue");
+//                cinemaRevenueList.add(new Object[]{cinemaName, totalRevenue});
+//            }
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return cinemaRevenueList;
+//    }
+
+
     public List<Object[]> getTotalRevenueForAllCinemas_Admin() {
         List<Object[]> cinemaRevenueList = new ArrayList<>();
 
-        String sql = "WITH CinemaRevenue AS (" +
-                "    SELECT c.cinemaId, c.[name] AS cinemaName, SUM(t.price) AS totalRevenue " +
-                "    FROM Cinema c " +
-                "    LEFT JOIN Room r ON c.cinemaId = r.cinemaId " +
-                "    LEFT JOIN Showtime s ON r.roomId = s.roomId " +
-                "    LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
-                "    GROUP BY c.cinemaId, c.[name] " +
-                ") " +
-                "SELECT cr.cinemaName, ISNULL(cr.totalRevenue, 0) AS totalRevenue " +
-                "FROM CinemaRevenue cr " +
-                "ORDER BY cr.totalRevenue DESC;";
+        String sql = "SELECT c.cinemaId, c.[name] AS cinemaName, COALESCE(SUM(t.price), 0) AS totalRevenue " +
+                "FROM Cinema c " +
+                "LEFT JOIN Room r ON c.cinemaId = r.cinemaId " +
+                "LEFT JOIN Showtime s ON r.roomId = s.roomId " +
+                "LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
+                "GROUP BY c.cinemaId, c.[name] " +
+                "ORDER BY totalRevenue DESC;";
 
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            // Duyệt qua kết quả và thêm vào danh sách
             while (rs.next()) {
+                int cinemaId = rs.getInt("cinemaId");
                 String cinemaName = rs.getString("cinemaName");
                 double totalRevenue = rs.getDouble("totalRevenue");
-                cinemaRevenueList.add(new Object[]{cinemaName, totalRevenue});
+                cinemaRevenueList.add(new Object[]{cinemaId, cinemaName, totalRevenue});
             }
 
         } catch (SQLException e) {
@@ -246,6 +275,8 @@ public class CinemaDAO extends DBContext {
 
         return cinemaRevenueList;
     }
+
+
 
 
 

@@ -62,16 +62,32 @@ public class DashBoardController extends HttpServlet {
         responseObject.add("popularShowtimes", gson.toJsonTree(showtimesList));
 
         // Fetch Total Revenue for All Cinemas
+//        CinemaDAO cinemaDAO = new CinemaDAO();
+//        List<Object[]> revenueList = cinemaDAO.getTotalRevenueForAllCinemas_Admin();
+//        List<JsonObject> revenueJsonList = new ArrayList<>();
+//        for (Object[] revenue : revenueList) {
+//            JsonObject revenueJson = new JsonObject();
+//            revenueJson.addProperty("cinemaName", (String) revenue[0]);
+//            revenueJson.addProperty("totalRevenue", (Double) revenue[1]);
+//            revenueJsonList.add(revenueJson);
+//        }
+//        responseObject.add("cinemaRevenues", gson.toJsonTree(revenueJsonList));
+
+        // Fetch Total Revenue for All Cinemas
         CinemaDAO cinemaDAO = new CinemaDAO();
         List<Object[]> revenueList = cinemaDAO.getTotalRevenueForAllCinemas_Admin();
         List<JsonObject> revenueJsonList = new ArrayList<>();
+
         for (Object[] revenue : revenueList) {
             JsonObject revenueJson = new JsonObject();
-            revenueJson.addProperty("cinemaName", (String) revenue[0]);
-            revenueJson.addProperty("totalRevenue", (Double) revenue[1]);
+            revenueJson.addProperty("cinemaId", (Integer) revenue[0]);  // Thêm cinemaId
+            revenueJson.addProperty("cinemaName", (String) revenue[1]);
+            revenueJson.addProperty("totalRevenue", (Double) revenue[2]);
             revenueJsonList.add(revenueJson);
         }
+
         responseObject.add("cinemaRevenues", gson.toJsonTree(revenueJsonList));
+
 
         // Send a single JSON response
         String jsonResponse = gson.toJson(responseObject);
