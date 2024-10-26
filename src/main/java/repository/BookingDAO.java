@@ -5,6 +5,8 @@ import context.DBContext;
 import model.*;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -40,6 +42,7 @@ public class BookingDAO extends DBContext {
 
         return booking;
     }
+
     public Booking getNewestBookingByUser(int userId) {
         Booking booking = null;
         String sql = "SELECT TOP 1 bookingId, totalcost, timestamp, UID, status " +
@@ -192,6 +195,7 @@ public class BookingDAO extends DBContext {
             return false;
         }
     }
+
     public boolean deleteBooking(int bookingId) {
         TicketDAO ticketDAO = new TicketDAO();
         ArrayList<Ticket> tickets = ticketDAO.getTicketByBooking(bookingId);
@@ -215,6 +219,7 @@ public class BookingDAO extends DBContext {
             return false; // Return false if there's an SQL exception
         }
     }
+
     public boolean paymentPending(int bookingId) {
         try {
             String sql = "UPDATE Booking SET status = ? WHERE bookingId = ?";
@@ -231,6 +236,7 @@ public class BookingDAO extends DBContext {
             return false;
         }
     }
+
     public boolean paymentFailed(int bookingId) {
         try {
             String sql = "UPDATE Booking SET status = ? WHERE bookingId = ?";
@@ -247,6 +253,7 @@ public class BookingDAO extends DBContext {
             return false;
         }
     }
+
     public ArrayList<Booking> searchBookingByDate(Date timestamp) {
 
         ArrayList<Booking> bookings = new ArrayList<>();
@@ -351,8 +358,89 @@ public class BookingDAO extends DBContext {
         return totalCost;
     }
 
+    public BookingDetail getBookingDetailById(int bookingId) {
+        BookingDetail bookingDetail = null;
+        String sql = "SELECT b.bookingId, b.timestamp AS bookingDate, a.email AS userEmail, " +
+                "b.totalcost, m.name AS filmName, m.poster AS moviePoster, " +
+                "s.showdate AS showtimeDate, s.starttime AS showtimeStart, s.endtime AS showtimeEnd, " +
+                "r.name AS roomName, seat.seatNum, " +
+                "c.name AS cinemaName, c.address AS cinemaAddress, c.logo AS cinemaLogo " +
+                "FROM Booking b " +
+                "JOIN Account a ON b.UID = a.UID " +
+                "JOIN Ticket t ON b.bookingId = t.bookingId " +
+                "JOIN Showtime s ON t.showtimeId = s.showtimeId " +
+                "JOIN Movie m ON s.movieId = m.movieId " +
+                "JOIN Room r ON s.roomId = r.roomId " +
+                "JOIN Seat seat ON t.seatId = seat.seatId " +
+                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
+                "WHERE b.bookingId = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, bookingId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.isBeforeFirst()) {  // Check if the ResultSet is empty
+                    return null;  // or throw new BookingNotFoundException("Booking not found for ID: " + bookingId);
+                }
+
+                StringBuilder seatNumbersBuilder = new StringBuilder();
+
+                // Process the result set if booking data is found
+                if (resultSet.next()) {
+                    bookingDetail = new BookingDetail();
+                    bookingDetail.setBookingId(resultSet.getInt("bookingId"));
+                    bookingDetail.setBookingDate(resultSet.getTimestamp("bookingDate").toString());
+                    bookingDetail.setUserEmail(resultSet.getString("userEmail"));
+                    bookingDetail.setTotalCost(resultSet.getDouble("totalcost"));
+                    bookingDetail.setFilmName(resultSet.getString("filmName"));
+                    bookingDetail.setMoviePoster(resultSet.getString("moviePoster"));
+                    bookingDetail.setShowtimeDate(resultSet.getString("showtimeDate"));
+                    bookingDetail.setShowtimeStart(resultSet.getString("showtimeStart"));
+                    bookingDetail.setShowtimeEnd(resultSet.getString("showtimeEnd"));
+                    bookingDetail.setRoomName(resultSet.getString("roomName"));
+                    bookingDetail.setCinemaName(resultSet.getString("cinemaName"));
+                    bookingDetail.setCinemaAddress(resultSet.getString("cinemaAddress"));
+                    bookingDetail.setCinemaLogo(resultSet.getString("cinemaLogo"));
+
+                    // Append the first seat number
+                    seatNumbersBuilder.append(resultSet.getString("seatNum"));
+
+                    // Collect any additional seat numbers
+                    while (resultSet.next()) {
+                        seatNumbersBuilder.append(", ").append(resultSet.getString("seatNum"));
+                    }
+
+                    bookingDetail.setSeatNumbers(seatNumbersBuilder.toString());  // Set as comma-separated string
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return bookingDetail;
+    }
+
     public static void main(String[] args) {
         BookingDAO bookingDAO = new BookingDAO();
-        System.out.println(bookingDAO.getNewestBookingByUser(8));
+        BookingDetail bookingDetail = bookingDAO.getBookingDetailById(45);
+//        SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm:ss.SSSSSSS");
+//        SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm");
+//
+//        // Format showtimeStart and showtimeEnd to "HH:mm" format
+//        String formattedShowtimeStart = bookingDetail.getShowtimeStart();
+//        String formattedShowtimeEnd = bookingDetail.getShowtimeEnd();
+//
+//        try {
+//            // Parse the input strings and format them to "HH:mm"
+//            Date startDate = inputFormat.parse(bookingDetail.getShowtimeStart());
+//            Date endDate = inputFormat.parse(bookingDetail.getShowtimeEnd());
+//            formattedShowtimeStart = outputFormat.format(startDate);
+//            formattedShowtimeEnd = outputFormat.format(endDate);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//            // If parsing fails, use the original string values
+//        }
+//        System.out.println(formattedShowtimeStart + "-" + formattedShowtimeEnd);
     }
 }
