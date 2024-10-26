@@ -7,10 +7,7 @@ package model;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author Techcare
- */
+
 public class Movie {
 
     private int movieId;

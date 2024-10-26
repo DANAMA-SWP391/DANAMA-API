@@ -60,8 +60,11 @@ public class CinemaController extends HttpServlet {
                 result = dao.deleteCinema(cinemaDelete.getCinemaId());
                 break;
             case "update":
-                Cinema cinemaUpdate = gson.fromJson(jsonObject.get("cinema"), Cinema.class);
-                result = dao.updateCinemaByID(cinemaUpdate.getCinemaId(), cinemaUpdate);
+                Cinema cinemaUpdate = gson.fromJson(jsonObject.get("cinema"), Cinema.class);  // Lấy đối tượng cinema từ JSON
+
+                // Gọi DAO để cập nhật
+                result = dao.updateCinema(cinemaUpdate);
+                break;
         }
 
         response.setContentType("application/json");

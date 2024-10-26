@@ -47,4 +47,43 @@ public class GenreDAO extends DBContext {
 
         return genres;
     }
+    // Hàm để lấy danh sách tất cả các thể loại
+    public List<Genre> getAllGenres() {
+        List<Genre> genres = new ArrayList<>();
+        String sql = "SELECT genreId, name FROM Genre";
+
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int genreId = resultSet.getInt("genreId");
+                String name = resultSet.getString("name");
+
+                Genre genre = new Genre(genreId, name);
+                genres.add(genre);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (statement != null) statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return genres;
+    }
+
+    public static void main(String[] args) {
+        GenreDAO genreDAO = new GenreDAO();
+
+        System.out.println(genreDAO.getAllGenres());
+    }
 }
