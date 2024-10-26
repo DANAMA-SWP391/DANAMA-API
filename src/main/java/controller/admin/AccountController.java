@@ -72,6 +72,22 @@ public class AccountController extends HttpServlet {
                 result = dao.banAccount(accountBan.getUID());
                 jsonResponse.addProperty("success", result);
                 break;
+
+            case "update":  // Thêm case "update"
+                Account updatedAccount = gson.fromJson(jsonObject.get("account"), Account.class);
+                System.out.println("Updating account with UID: " + updatedAccount.getUID());
+                result = dao.updateAccountByID(updatedAccount.getUID(), updatedAccount);
+
+                jsonResponse.addProperty("success", result);
+
+                if (result) {
+                    // Nếu cập nhật thành công, trả về đối tượng đã được cập nhật
+                    Account updatedAccountDetails = dao.getAccountById(updatedAccount.getUID()); // Lấy thông tin chi tiết sau khi cập nhật
+                    jsonResponse.add("account", gson.toJsonTree(updatedAccountDetails)); // Trả về tài khoản cập nhật
+                } else {
+                    jsonResponse.addProperty("message", "Failed to update account.");
+                }
+                break;
         }
 
         response.setContentType("application/json");
