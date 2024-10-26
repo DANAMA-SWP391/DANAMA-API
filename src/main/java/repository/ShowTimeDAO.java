@@ -1,6 +1,5 @@
 
 package repository;
-
 import context.DBContext;
 import model.Movie;
 import model.Room;
@@ -13,8 +12,8 @@ import java.util.List;
 
 public class ShowTimeDAO extends DBContext {
     public boolean addShowtime(Showtime Showtime) {
-        
-        String sql = "INSERT INTO Showtime ( showdate, starttime, endtime, baseprice, movieId, roomId, seatAvailable, status) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        String sql = "INSERT INTO Showtime ( showdate, starttime, endtime, baseprice, movieId, roomId, status) VALUES ( ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -24,8 +23,7 @@ public class ShowTimeDAO extends DBContext {
             preparedStatement.setDouble(4, Showtime.getBasePrice());
             preparedStatement.setInt(5, Showtime.getMovie().getMovieId());
             preparedStatement.setInt(6, Showtime.getRoom().getRoomId());
-            preparedStatement.setInt(7, Showtime.getSeatAvailable());
-            preparedStatement.setInt(8, Showtime.getStatus());
+            preparedStatement.setInt(7, Showtime.getStatus());
 
             int affectedRows = preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -40,9 +38,9 @@ public class ShowTimeDAO extends DBContext {
     public ArrayList<Showtime> getListShowtimes() {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
-        String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, seatAvailable, status " +
+        String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, status " +
                 "FROM Showtime";
-
+        RoomDAO roomDAO = new RoomDAO();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -54,16 +52,17 @@ public class ShowTimeDAO extends DBContext {
                 showtime.setStartTime(resultSet.getTime("starttime"));
                 showtime.setEndTime(resultSet.getTime("endtime"));
                 showtime.setBasePrice(resultSet.getDouble("baseprice"));
-                showtime.setSeatAvailable(resultSet.getInt("seatAvailable"));
+                showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
                 showtime.setStatus(resultSet.getInt("status"));
 
                 // Retrieve Movie using movieId and set it in the Showtime object
-                MovieDAO movieDAO = new MovieDAO();
-                Movie movie = movieDAO.getMovieById(resultSet.getInt("movieId"));
+
+                Movie movie = new Movie();
+                movie.setMovieId(resultSet.getInt("movieId"));
                 showtime.setMovie(movie);
 
                 // Retrieve Room using roomId and set it in the Showtime object
-                RoomDAO roomDAO = new RoomDAO();
+
                 Room room = roomDAO.getRoomById(resultSet.getInt("roomId"));
                 showtime.setRoom(room);
 
@@ -82,7 +81,7 @@ public class ShowTimeDAO extends DBContext {
     public ArrayList<Showtime> getListShowtimesByCinemaID(int cinemaId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
-        String sql = "SELECT s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.seatAvailable, s.status " +
+        String sql = "SELECT s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.status " +
                 "FROM Showtime s " +
                 "JOIN Room r ON s.roomId = r.roomId " +
                 "WHERE r.cinemaId = ?";
@@ -99,12 +98,12 @@ public class ShowTimeDAO extends DBContext {
                 showtime.setStartTime(resultSet.getTime("starttime"));
                 showtime.setEndTime(resultSet.getTime("endtime"));
                 showtime.setBasePrice(resultSet.getDouble("baseprice"));
-                showtime.setSeatAvailable(resultSet.getInt("seatAvailable"));
+                showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
                 showtime.setStatus(resultSet.getInt("status"));
 
                 // Retrieve Movie using movieId and set it in the Showtime object
-                MovieDAO movieDAO = new MovieDAO();
-                Movie movie = movieDAO.getMovieById(resultSet.getInt("movieId"));
+                Movie movie = new Movie();
+                movie.setMovieId(resultSet.getInt("movieId"));
                 showtime.setMovie(movie);
 
                 // Retrieve Room using roomId and set it in the Showtime object
@@ -127,10 +126,11 @@ public class ShowTimeDAO extends DBContext {
     public ArrayList<Showtime> getListShowtimesByRoom(int roomId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
-        String sql = "SELECT s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.seatAvailable, s.status " +
+        String sql = "SELECT s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.status " +
                 "FROM Showtime s " +
                 "WHERE s.roomId = ?";
-
+        RoomDAO roomDAO = new RoomDAO();
+        Room room = roomDAO.getRoomById(roomId);
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, roomId);
@@ -143,17 +143,11 @@ public class ShowTimeDAO extends DBContext {
                 showtime.setStartTime(resultSet.getTime("starttime"));
                 showtime.setEndTime(resultSet.getTime("endtime"));
                 showtime.setBasePrice(resultSet.getDouble("baseprice"));
-                showtime.setSeatAvailable(resultSet.getInt("seatAvailable"));
+                showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
                 showtime.setStatus(resultSet.getInt("status"));
-
-                // Retrieve Movie using movieId and set it in the Showtime object
-                MovieDAO movieDAO = new MovieDAO();
-                Movie movie = movieDAO.getMovieById(resultSet.getInt("movieId"));
+                Movie movie = new Movie();
+                movie.setMovieId(resultSet.getInt("movieId"));
                 showtime.setMovie(movie);
-
-                // Retrieve Room using roomId and set it in the Showtime object
-                RoomDAO roomDAO = new RoomDAO();
-                Room room = roomDAO.getRoomById(resultSet.getInt("roomId"));
                 showtime.setRoom(room);
 
                 // Add the populated Showtime object to the list
@@ -170,7 +164,7 @@ public class ShowTimeDAO extends DBContext {
     }
     public boolean updateShowtime(int showtimeId, Showtime showtime) {
 
-        String sql = "UPDATE Showtime SET showdate = ?, starttime = ?, endtime = ?, baseprice = ?, movieId = ?, roomId = ?, seatAvailable = ?, status = ? WHERE showtimeId = ?";
+        String sql = "UPDATE Showtime SET showdate = ?, starttime = ?, endtime = ?, baseprice = ?, movieId = ?, roomId = ?, status = ? WHERE showtimeId = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -180,9 +174,8 @@ public class ShowTimeDAO extends DBContext {
             preparedStatement.setDouble(4, showtime.getBasePrice());
             preparedStatement.setInt(5, showtime.getMovie().getMovieId());
             preparedStatement.setInt(6, showtime.getRoom().getRoomId());
-            preparedStatement.setInt(7, showtime.getSeatAvailable());
-            preparedStatement.setInt(8, showtime.getStatus());
-            preparedStatement.setInt(9, showtimeId);
+            preparedStatement.setInt(7, showtime.getStatus());
+            preparedStatement.setInt(8, showtimeId);
 
             int affectedRows = preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -197,46 +190,43 @@ public class ShowTimeDAO extends DBContext {
     public ArrayList<Showtime> getShowtimeByMovie(int movieId) {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
-        String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, seatAvailable, status " +
+        String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, status " +
                 "FROM Showtime WHERE movieId = ?";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        // Create DAO instances outside the loop to avoid creating them repeatedly
+        RoomDAO roomDAO = new RoomDAO();
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, movieId);
-            ResultSet resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                Showtime showtime = new Showtime();
-                showtime.setShowtimeId(resultSet.getInt("showtimeId"));
-                showtime.setShowDate(resultSet.getDate("showdate"));
-                showtime.setStartTime(resultSet.getTime("starttime"));
-                showtime.setEndTime(resultSet.getTime("endtime"));
-                showtime.setBasePrice(resultSet.getDouble("baseprice"));
-                showtime.setSeatAvailable(resultSet.getInt("seatAvailable"));
-                showtime.setStatus(resultSet.getInt("status"));
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Showtime showtime = new Showtime();
+                    showtime.setShowtimeId(resultSet.getInt("showtimeId"));
+                    showtime.setShowDate(resultSet.getDate("showdate"));
+                    showtime.setStartTime(resultSet.getTime("starttime"));
+                    showtime.setEndTime(resultSet.getTime("endtime"));
+                    showtime.setBasePrice(resultSet.getDouble("baseprice"));
+                    showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
+                    showtime.setStatus(resultSet.getInt("status"));
+                    Movie movie = new Movie();
+                    movie.setMovieId(resultSet.getInt("movieId"));
+                    showtime.setMovie(movie);
 
-                // Retrieve Movie using movieId and set it in the Showtime object
-                MovieDAO movieDAO = new MovieDAO();
-                Movie movie = movieDAO.getMovieById(resultSet.getInt("movieId"));
-                showtime.setMovie(movie);
+                    Room room = roomDAO.getRoomById(resultSet.getInt("roomId"));
+                    showtime.setRoom(room);
 
-                // Retrieve Room using roomId and set it in the Showtime object
-                RoomDAO roomDAO = new RoomDAO();
-                Room room = roomDAO.getRoomById(resultSet.getInt("roomId"));
-                showtime.setRoom(room);
-
-                // Add the populated Showtime object to the list
-                showtimes.add(showtime);
+                    // Add the populated Showtime object to the list
+                    showtimes.add(showtime);
+                }
             }
-
-            resultSet.close();
-            preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return showtimes;
     }
+
     public boolean deleteShowtime(int showtimeId) {
 
         String sql = "DELETE FROM Showtime WHERE showtimeId = ?";
@@ -259,11 +249,11 @@ public class ShowTimeDAO extends DBContext {
 
         try {
             // SQL query to get the top 5 popular showtimes based on ticket sales
-            String sql = "SELECT TOP 5 s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.seatAvailable, COUNT(t.ticketId) AS ticketCount " +
+            String sql = "SELECT TOP 5 s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, COUNT(t.ticketId) AS ticketCount " +
                     "FROM Showtime s " +
                     "LEFT JOIN Ticket t ON s.showtimeId = t.showtimeId " +
                     "WHERE s.roomId IN (SELECT roomId FROM Room WHERE cinemaId = ?) " +
-                    "GROUP BY s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.seatAvailable " +
+                    "GROUP BY s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId " +
                     "ORDER BY ticketCount DESC";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -277,11 +267,12 @@ public class ShowTimeDAO extends DBContext {
                 showtime.setStartTime(resultSet.getTime("starttime"));
                 showtime.setEndTime(resultSet.getTime("endtime"));
                 showtime.setBasePrice(resultSet.getDouble("baseprice"));
-                MovieDAO movieDAO = new MovieDAO();
-                showtime.setMovie(movieDAO.getMovieById(resultSet.getInt("movieId"))); // Assuming you have a method to get Movie by ID
+                Movie movie = new Movie();
+                movie.setMovieId(resultSet.getInt("movieId"));
+                showtime.setMovie(movie); // Assuming you have a method to get Movie by ID
                 RoomDAO roomDAO = new RoomDAO();
                 showtime.setRoom(roomDAO.getRoomById(resultSet.getInt("roomId"))); // Assuming you have a method to get Room by ID
-                showtime.setSeatAvailable(resultSet.getInt("seatAvailable"));
+                showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
 
                 topShowtimes.add(showtime);
             }
@@ -348,7 +339,7 @@ public class ShowTimeDAO extends DBContext {
     public Showtime getShowtimeById(int showtimeId) {
         Showtime showtime = null;
 
-        String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, seatAvailable, status " +
+        String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, status " +
                 "FROM Showtime WHERE showtimeId = ?";
 
         try {
@@ -363,12 +354,10 @@ public class ShowTimeDAO extends DBContext {
                 showtime.setStartTime(resultSet.getTime("starttime"));
                 showtime.setEndTime(resultSet.getTime("endtime"));
                 showtime.setBasePrice(resultSet.getDouble("baseprice"));
-                showtime.setSeatAvailable(resultSet.getInt("seatAvailable"));
+                showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
                 showtime.setStatus(resultSet.getInt("status"));
-
-                // Retrieve Movie using movieId and set it in the Showtime object
-                MovieDAO movieDAO = new MovieDAO();
-                Movie movie = movieDAO.getMovieById(resultSet.getInt("movieId"));
+                Movie movie = new Movie();
+                movie.setMovieId(resultSet.getInt("movieId"));
                 showtime.setMovie(movie);
 
                 // Retrieve Room using roomId and set it in the Showtime object
@@ -385,6 +374,7 @@ public class ShowTimeDAO extends DBContext {
 
         return showtime;
     }
+
     public List<Object[]> getMostPopularShowtimes_Admin() {
         List<Object[]> popularTimes = new ArrayList<>();
 
@@ -440,6 +430,35 @@ public class ShowTimeDAO extends DBContext {
 
         return popularTimes;
     }
+    public int getSeatAvailableById(int showtimeId) {
+        String sql = "SELECT (SELECT COUNT(*) FROM Seat WHERE roomId = S.roomId) - ISNULL(COUNT(T.ticketId), 0) AS seatAvailable " +
+                "FROM Showtime S " +
+                "LEFT JOIN Ticket T ON S.showtimeId = T.showtimeId " +
+                "WHERE S.showtimeId = ? " +
+                "GROUP BY S.roomId";
+
+        int seatAvailable = 0;
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, showtimeId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                seatAvailable = resultSet.getInt("seatAvailable");
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return seatAvailable;
+    }
+
+
     public static void main(String[] args) {
         ShowTimeDAO dao = new ShowTimeDAO();
 //        System.out.println(dao.getListShowtimes());
@@ -450,8 +469,8 @@ public class ShowTimeDAO extends DBContext {
 //        }
 //        System.out.println(dao.getShowtimeById(1));
 //        System.out.println(dao.getMostPopularTimeSlotInCinema(1));
-        for(Showtime s: dao.getTop5PopularShowtimesInCinema(1)) {
-            System.out.println(s);
-        }
+//        for(Showtime s: dao.getListShowtimes()) {
+//            System.out.println(s.getSeatAvailable());
+//        }
     }
 }

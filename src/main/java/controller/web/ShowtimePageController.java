@@ -11,9 +11,11 @@ import model.Cinema;
 import model.Showtime;
 import repository.CinemaDAO;
 import repository.ShowTimeDAO;
+import utils.Utility;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -30,7 +32,9 @@ public class ShowtimePageController extends HttpServlet {
         HashMap<String,Object> responseData= new HashMap<>();
         responseData.put("cinemas",listCinema);
         responseData.put("showtimes",listShowtime);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson =  new GsonBuilder()
+                .registerTypeAdapter(Time.class, new Utility.TimeSerializer())  // Register the custom Time serializer
+                .create();
         PrintWriter out = response.getWriter();
         out.write(gson.toJson(responseData));
         out.flush();

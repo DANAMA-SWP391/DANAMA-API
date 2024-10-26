@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TicketDAO extends DBContext {
     public ArrayList<Ticket> getTicketByBooking(int bookingId) {
@@ -33,13 +34,13 @@ public class TicketDAO extends DBContext {
                 ticket.setPhone(resultSet.getString("phone"));
 
                 // Get the Booking object by bookingId
-                BookingDAO bookingDAO = new BookingDAO();
-                Booking booking = bookingDAO.getBookingById(resultSet.getInt("bookingId"));
+                Booking booking = new Booking();
+                booking.setBookingId(bookingId);
                 ticket.setBooking(booking);
 
                 // Get the Showtime object by showtimeId
-                ShowTimeDAO showTimeDAO = new ShowTimeDAO();
-                Showtime showtime = showTimeDAO.getShowtimeById(resultSet.getInt("showtimeId"));
+                Showtime showtime = new Showtime();
+                showtime.setShowtimeId(resultSet.getInt("showtimeId"));
                 ticket.setShowtime(showtime);
 
                 // Get the Seat object by seatId
@@ -104,18 +105,18 @@ public class TicketDAO extends DBContext {
                 ticket.setPhone(resultSet.getString("phone"));
 
                 // Get the Booking object by bookingId
-                BookingDAO bookingDAO = new BookingDAO();
-                Booking booking = bookingDAO.getBookingById(resultSet.getInt("bookingId"));
+                Booking booking = new Booking();
+                booking.setBookingId(resultSet.getInt("bookingId"));
                 ticket.setBooking(booking);
 
                 // Get the Showtime object by showtimeId
-                ShowTimeDAO showTimeDAO = new ShowTimeDAO();
-                Showtime showtime = showTimeDAO.getShowtimeById(resultSet.getInt("showtimeId"));
+                Showtime showtime = new Showtime();
+                showtime.setShowtimeId(resultSet.getInt("showtimeId"));
                 ticket.setShowtime(showtime);
 
                 // Get the Seat object by seatId
-                SeatDAO seatDAO = new SeatDAO();
-                Seat seat = seatDAO.getSeatById(resultSet.getInt("seatId"));
+                Seat seat = new Seat();
+                seat.setSeatId(resultSet.getInt("seatId"));
                 ticket.setSeat(seat);
 
                 // Add the ticket to the list
@@ -227,17 +228,35 @@ public class TicketDAO extends DBContext {
 
         return ticketData;
     }
+    public boolean deleteTicket(int ticketId) {
+        String sql = "DELETE FROM Ticket WHERE ticketId = ?";
 
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, ticketId);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            return rowsAffected > 0; // Return true if the ticket was successfully deleted
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Return false if an SQL error occurs
+        }
+    }
     public static void main(String[] args) {
-        TicketDAO dao = new TicketDAO();
-//        System.out.println(dao.getTicketByBooking(1));
-//
-//
-//        ArrayList arr = dao.getTicketsSoldPerMonth(1);
-//        for(Object o: arr) {
-//            System.out.println(o);
-//        System.out.println(dao.getTicketSoldInCurrentMonth(1));
-        System.out.println(System.getenv("AZURE_STORAGE_CONNECTION_STRING"));
+        SeatDAO seatDAO = new SeatDAO();
+        List<Seat> seats= seatDAO.getListSeatsInRoom(1);
+        TicketDAO ticketDAO = new TicketDAO();
+        List<Ticket> tickets = ticketDAO.getTicketListOfShowtime(1);
+        for(Ticket ticket: tickets) {
+            System.out.println(ticket.getSeat().getSeatId());
+        }
+        for(Seat seat : seats) {
+            for(Ticket ticket : tickets) {
+                if(seat.getSeatId()==ticket.getSeat().getSeatId()) {
+                    seat.setType("Booked");
+                }
+            }
+            System.out.println(seat);
+        }
         }
     }
 

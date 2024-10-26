@@ -11,7 +11,6 @@ import model.Cinema;
 
 
 import context.DBContext;
-import model.Showtime;
 
 
 public class RoomDAO extends DBContext {
@@ -19,7 +18,7 @@ public class RoomDAO extends DBContext {
     public ArrayList<Room> getListRoom() {
         ArrayList<Room> rooms = new ArrayList<>();
 
-        String sql = "SELECT roomId, name, numberOfSeat, cinemaId FROM Room";
+        String sql = "SELECT roomId, name, cinemaId FROM Room";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -29,9 +28,9 @@ public class RoomDAO extends DBContext {
                 Room room = new Room();
                 room.setRoomId(resultSet.getInt("roomId"));
                 room.setName(resultSet.getString("name"));
-                room.setNumberOfSeat(resultSet.getInt("numberOfSeat"));
-                CinemaDAO cinemaDAO = new CinemaDAO();
-                Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
+                room.setNumberOfSeat(getNumberOfSeatsByRoom(room.getRoomId()));
+                Cinema cinema = new Cinema();
+                cinema.setCinemaId(resultSet.getInt("cinemaId"));
                 room.setCinema(cinema);
                 rooms.add(room);
             }
@@ -47,7 +46,7 @@ public class RoomDAO extends DBContext {
 
     // Method to add a new Room using Room object
     public boolean addNewRoom(Room room) {
-        String sql = "INSERT INTO Room ([name], numberOfSeat, cinemaId) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Room ([name], cinemaId) VALUES (?, ?)";
 
         try {
             // Sử dụng connection từ DBContext
@@ -55,8 +54,7 @@ public class RoomDAO extends DBContext {
 
             // Set các tham số cho truy vấn SQL từ đối tượng Room
             ps.setString(1, room.getName());
-            ps.setInt(2, room.getNumberOfSeat());
-            ps.setInt(3, room.getCinema().getCinemaId());  // Lấy cinemaId từ đối tượng Cinema
+            ps.setInt(2, room.getCinema().getCinemaId());  // Lấy cinemaId từ đối tượng Cinema
 
             // Thực thi câu lệnh SQL để thêm phòng mới
             ps.executeUpdate();
@@ -95,8 +93,8 @@ public class RoomDAO extends DBContext {
     public Room getRoomById(int roomId) {
         Room room = null;
 
-        String sql = "SELECT roomId, name, numberOfSeat, cinemaId FROM Room WHERE roomId=? ";
-
+        String sql = "SELECT roomId, name, cinemaId FROM Room WHERE roomId=? ";
+        CinemaDAO cinemaDAO = new CinemaDAO();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, roomId);
@@ -106,11 +104,12 @@ public class RoomDAO extends DBContext {
                 room = new Room();
                 room.setRoomId(resultSet.getInt("roomId"));
                 room.setName(resultSet.getString("name"));
-                room.setNumberOfSeat(resultSet.getInt("numberOfSeat"));
+                room.setNumberOfSeat(getNumberOfSeatsByRoom(room.getRoomId()));
 
                 // Fetch the Cinema details using the cinemaId
-                CinemaDAO cinemaDAO = new CinemaDAO();
-                Cinema cinema = cinemaDAO.getCinemaById(resultSet.getInt("cinemaId"));
+
+                Cinema cinema = new Cinema();
+                cinema.setCinemaId(resultSet.getInt("cinemaId"));
                 room.setCinema(cinema);
             }
 
@@ -124,14 +123,13 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean updateRoom(int roomId , Room room) {
-        String sql = "UPDATE Room SET name = ?, numberOfSeat = ?, cinemaId = ? WHERE roomId = ?";
+        String sql = "UPDATE Room SET name = ?, cinemaId = ? WHERE roomId = ?";
         try (Connection conn = connection;
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, room.getName());
-            ps.setInt(2, room.getNumberOfSeat());
-            ps.setInt(3, room.getCinema().getCinemaId());
-            ps.setInt(4, roomId);
+            ps.setInt(2, room.getCinema().getCinemaId());
+            ps.setInt(3, roomId);
 
             int rowsUpdated = ps.executeUpdate();
             return rowsUpdated > 0;
@@ -140,41 +138,23 @@ public class RoomDAO extends DBContext {
         }
         return false;
     }
-
-
-
-
     public ArrayList<Room> getListRoomsByCinemaID(int cinemaId) {
         ArrayList<Room> rooms = new ArrayList<Room>();
-        String query = "SELECT r.roomId, r.name, r.numberOfSeat, c.cinemaId, c.name, c.logo, c.address, c.description, c.image, c.managerId " +
-                "FROM Room r " +
-                "JOIN Cinema c ON r.cinemaId = c.cinemaId " +
-                "WHERE r.cinemaId = ?";
+        String query = "SELECT roomId, name, cinemaId FROM Room WHERE cinemaId=? ";
         try {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, cinemaId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                // Fetch Cinema object
-                Cinema cinema = new Cinema(
-                        rs.getInt("cinemaId"),
-                        rs.getString("name"),
-                        rs.getString("logo"),
-                        rs.getString("address"),
-                        rs.getString("description"),
-                        rs.getString("image"),
-                        rs.getInt("managerId")
-                );
+                Room room = new Room();
+                room.setRoomId(rs.getInt("roomId"));
+                room.setName(rs.getString("name"));
+                room.setNumberOfSeat(getNumberOfSeatsByRoom(room.getRoomId()));
 
-                // Fetch Room object
-                Room room = new Room(
-                        rs.getInt("roomId"),
-                        rs.getString("name"),
-                        rs.getInt("numberOfSeat"),
-                        cinema
-                );
-
-                rooms.add(room); // Add Room object to the list
+                Cinema cinema = new Cinema();
+                cinema.setCinemaId(rs.getInt("cinemaId"));
+                room.setCinema(cinema);
+                rooms.add(room);
             }
         } catch (SQLException e) {
             System.out.println("Error in getListRoomsByCinemaID: " + e.getMessage());
@@ -182,6 +162,31 @@ public class RoomDAO extends DBContext {
         return rooms;
     }
 
+    public int getNumberOfSeatsByRoom(int roomId) {
+        String sql = "SELECT COUNT(*) AS numberOfSeats " +
+                "FROM Seat " +
+                "WHERE roomId = ?";
+
+        int numberOfSeats = 0;
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, roomId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                numberOfSeats = resultSet.getInt("numberOfSeats");
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return numberOfSeats;
+    }
 
     public static void main(String[] args) {
         RoomDAO dao = new RoomDAO();

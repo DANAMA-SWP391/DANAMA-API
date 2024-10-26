@@ -40,15 +40,16 @@ public class BookingDAO extends DBContext {
 
         return booking;
     }
-
-    public Booking getBookingByUserAndDate(int userId, Date timestamp) {
+    public Booking getNewestBookingByUser(int userId) {
         Booking booking = null;
-        String sql = "SELECT bookingId, totalcost, timestamp, UID, status FROM Booking WHERE UID = ? AND CAST(timestamp AS DATE) = CAST(? AS DATE)";
+        String sql = "SELECT TOP 1 bookingId, totalcost, timestamp, UID, status " +
+                "FROM Booking " +
+                "WHERE UID = ? " +
+                "ORDER BY timestamp DESC "; // Only return the newest booking (latest timestamp)
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, userId);
-            preparedStatement.setTimestamp(2, new Timestamp(timestamp.getTime())); // Convert java.util.Date to SQL timestamp
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -191,7 +192,61 @@ public class BookingDAO extends DBContext {
             return false;
         }
     }
+    public boolean deleteBooking(int bookingId) {
+        TicketDAO ticketDAO = new TicketDAO();
+        ArrayList<Ticket> tickets = ticketDAO.getTicketByBooking(bookingId);
 
+        // Step 1: Delete all tickets associated with this booking
+        for (Ticket ticket : tickets) {
+            if (!ticketDAO.deleteTicket(ticket.getTicketId())) {
+                return false; // Return false if any ticket deletion fails
+            }
+        }
+
+        // Step 2: Delete the booking itself
+        String sql = "DELETE FROM Booking WHERE bookingId = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, bookingId);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            return rowsAffected > 0; // Return true if booking deletion is successful
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Return false if there's an SQL exception
+        }
+    }
+    public boolean paymentPending(int bookingId) {
+        try {
+            String sql = "UPDATE Booking SET status = ? WHERE bookingId = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, 0); // Set the status to 0
+            preparedStatement.setInt(2, bookingId);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean paymentFailed(int bookingId) {
+        try {
+            String sql = "UPDATE Booking SET status = ? WHERE bookingId = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, 2); // Set the status to 2
+            preparedStatement.setInt(2, bookingId);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public ArrayList<Booking> searchBookingByDate(Date timestamp) {
 
         ArrayList<Booking> bookings = new ArrayList<>();
@@ -298,6 +353,6 @@ public class BookingDAO extends DBContext {
 
     public static void main(String[] args) {
         BookingDAO bookingDAO = new BookingDAO();
-        System.out.println(bookingDAO.getDailyTotalCostByCinema(1));
+        System.out.println(bookingDAO.getNewestBookingByUser(8));
     }
 }

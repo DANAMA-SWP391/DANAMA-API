@@ -3,15 +3,15 @@ package repository;
 import context.DBContext;
 import model.Review;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ReviewDAO extends DBContext {
+
     // Method to add a new review to the database
     public boolean addNewReview(Review review) {
         String sql = "INSERT INTO Review (rating, comment, [date], [UID], movieId) VALUES (?, ?, ?, ?, ?)";
@@ -24,7 +24,7 @@ public class ReviewDAO extends DBContext {
             // Set parameters
             statement.setInt(1, review.getRating());
             statement.setString(2, review.getComment());
-            statement.setDate(3, new Date(review.getDate().getTime())); // Correct conversion from java.util.Date to java.sql.Date
+            statement.setTimestamp(3, review.getDate()); // Use Timestamp to include date and time
             statement.setInt(4, review.getUid());
             statement.setInt(5, review.getMovieId());
 
@@ -44,36 +44,39 @@ public class ReviewDAO extends DBContext {
         }
     }
 
-    // Method to get reviews by movieId
     public List<Review> getReviewByMovie(String movieId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT * FROM Review WHERE movieId = ?";
+        String sql = "SELECT r.*, a.name as reviewer, a.avatar as avatar " +
+                "FROM Review r " +
+                "JOIN Account a ON r.UID = a.UID " +
+                "WHERE r.movieId = ? " +
+                "ORDER BY r.date DESC";  // Sort by date in descending order
         PreparedStatement statement = null;
         ResultSet rs = null;
 
         try {
-            // Sử dụng connection từ DBContext
+            // Using connection from DBContext
             statement = connection.prepareStatement(sql);
 
-            // Set tham số movieId cho câu lệnh SQL
+            // Set the movieId parameter for the SQL statement
             statement.setString(1, movieId);
 
-            // Thực thi câu lệnh và lấy kết quả
+            // Execute the statement and retrieve the result
             rs = statement.executeQuery();
 
-            // Duyệt qua từng dòng kết quả
+            // Iterate through each result row
             while (rs.next()) {
-                int reviewId = rs.getInt("reviewId");
-                int rating = rs.getInt("rating");
-                String comment = rs.getString("comment");
-                Date date = rs.getDate("date");
-                int UID = rs.getInt("UID");
-                int movie_Id = rs.getInt("movieId");
+                Review review = new Review();
+                review.setReviewId(rs.getInt("reviewId"));
+                review.setRating(rs.getInt("rating"));
+                review.setComment(rs.getString("comment"));
+                review.setDate(rs.getTimestamp("date")); // Use getTimestamp to retrieve full datetime
+                review.setUid(rs.getInt("UID"));
+                review.setMovieId(Integer.parseInt(movieId));
+                review.setReviewer(rs.getString("reviewer"));
+                review.setAvatar(rs.getString("avatar"));
 
-                // Tạo đối tượng Review từ dữ liệu truy vấn được
-                Review review = new Review(reviewId, rating, comment, date, UID, movie_Id);
-
-                // Thêm review vào danh sách
+                // Add the review to the list
                 reviews.add(review);
             }
 
@@ -90,22 +93,20 @@ public class ReviewDAO extends DBContext {
 
         return reviews;
     }
-    public boolean updateReview(Review review) {
 
-        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ?, UID = ?, movieId = ? WHERE reviewId = ?";
+    public boolean updateReview(Review review) {
+        String sql = "UPDATE Review SET rating = ?, comment = ?, date = ? WHERE reviewId = ?";
         PreparedStatement statement = null;
 
         try {
-            // Using the connection from DBContext
+            // Using connection from DBContext
             statement = connection.prepareStatement(sql);
 
             // Set the parameters
             statement.setInt(1, review.getRating());
             statement.setString(2, review.getComment());
-            statement.setDate(3, new Date(review.getDate().getTime()));
-            statement.setInt(4, review.getUid());
-            statement.setInt(5, review.getMovieId());
-            statement.setInt(6, review.getReviewId());
+            statement.setTimestamp(3, review.getDate()); // Use Timestamp for date and time
+            statement.setInt(4, review.getReviewId());
 
             // Execute the update
             statement.executeUpdate();
@@ -121,12 +122,13 @@ public class ReviewDAO extends DBContext {
             }
         }
     }
+
     public boolean deleteReview(int reviewId) {
         String sql = "DELETE FROM Review WHERE reviewId = ?";
         PreparedStatement statement = null;
 
         try {
-            // Using the connection from DBContext
+            // Using connection from DBContext
             statement = connection.prepareStatement(sql);
 
             // Set parameter
@@ -147,11 +149,9 @@ public class ReviewDAO extends DBContext {
             }
         }
     }
+
     public static void main(String[] args) {
-//        java.util.Date date = new java.util.Date();
-//        Review newReview = new Review(3, 5, "Nice!", date, 4, 3);
         ReviewDAO reviewDAO = new ReviewDAO();
-//        reviewDAO.addNewReview(newReview);
         List<Review> reviews = reviewDAO.getReviewByMovie("1");
 
         for (Review review : reviews) {

@@ -23,14 +23,14 @@ CREATE TABLE Genre (
 CREATE TABLE Movie (
     movieId INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(255) NOT NULL,
-    [description] TEXT,
+    [description] NVARCHAR(255),
     poster VARCHAR(255),
     trailer VARCHAR(255),
     releasedate DATE,
     country VARCHAR(255),
     director NVARCHAR(255),
     agerestricted INT,
-    actors TEXT,
+    actors NVARCHAR(255),
     duration INT,
     status INT
 );
@@ -48,7 +48,7 @@ CREATE TABLE MovieGenre (
 CREATE TABLE Review (
     reviewId INT PRIMARY KEY IDENTITY(1,1),
     rating INT,
-    comment TEXT,
+    comment NVARCHAR(255),
     [date] DATETIME,
     [UID] INT,
 	movieId INT,
@@ -61,8 +61,8 @@ CREATE TABLE Cinema (
     cinemaId INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(255) NOT NULL,
     logo VARCHAR(255),
-    [address] TEXT,
-    [description] TEXT,
+    [address] NVARCHAR(255),
+    [description] NVARCHAR(255),
     [image] VARCHAR(255),
 	managerId int,
 	FOREIGN KEY (managerId) REFERENCES Account([UID])
@@ -72,7 +72,6 @@ CREATE TABLE Cinema (
 CREATE TABLE Room (
     roomId INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(255),
-    numberOfSeat INT,
     cinemaId INT,
     FOREIGN KEY (cinemaId) REFERENCES Cinema(cinemaId)
 );
@@ -85,6 +84,7 @@ CREATE TABLE Seat (
     [row] INT,
     [type] VARCHAR(50),
     roomId INT,
+    status INT,
     FOREIGN KEY (roomId) REFERENCES Room(roomId)
 );
 
@@ -97,7 +97,6 @@ CREATE TABLE Showtime (
     baseprice DECIMAL(10, 2),
     movieId INT,
     roomId INT,
-	seatAvailable INT,
     status INT,
     FOREIGN KEY (movieId) REFERENCES Movie(movieId),
     FOREIGN KEY (roomId) REFERENCES Room(roomId)

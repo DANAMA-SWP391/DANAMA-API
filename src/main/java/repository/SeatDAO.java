@@ -15,17 +15,36 @@ public class SeatDAO extends DBContext {
 
     // Method to add a new seat to the database
     public boolean addSeat(Seat seat) {
-        String sql = "INSERT INTO Seat (seatNum, col, [row], [type], roomId) VALUES (?, ?, ?, ?, ?)";
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, seat.getSeatNum());
-            ps.setInt(2, seat.getCol());
-            ps.setInt(3, seat.getRow());
-            ps.setString(4, seat.getType());
-            ps.setInt(5, seat.getRoom().getRoomId()); // Assuming Room has a getRoomId method
+        String checkSql = "SELECT seatId FROM Seat WHERE seatNum = ? AND roomId = ? AND status = 0";
+        String updateSql = "UPDATE Seat SET status = 1, [type] = ? WHERE seatId = ?";
+        String insertSql = "INSERT INTO Seat (seatNum, col, [row], [type], roomId, status) VALUES (?, ?, ?, ?, ?, 1)";
 
-            ps.executeUpdate();
-            System.out.println("New seat added successfully!");
+        try {
+            // Check if an inactive seat with the same seatNum and roomId exists
+            PreparedStatement checkPs = connection.prepareStatement(checkSql);
+            checkPs.setString(1, seat.getSeatNum());
+            checkPs.setInt(2, seat.getRoom().getRoomId());
+            ResultSet rs = checkPs.executeQuery();
+
+            if (rs.next()) {
+                // Reactivate and update the seat type
+                int seatId = rs.getInt("seatId");
+                PreparedStatement updatePs = connection.prepareStatement(updateSql);
+                updatePs.setString(1, seat.getType());
+                updatePs.setInt(2, seatId);
+                updatePs.executeUpdate();
+                System.out.println("Seat reactivated and updated successfully!");
+            } else {
+                // Insert a new seat
+                PreparedStatement insertPs = connection.prepareStatement(insertSql);
+                insertPs.setString(1, seat.getSeatNum());
+                insertPs.setInt(2, seat.getCol());
+                insertPs.setInt(3, seat.getRow());
+                insertPs.setString(4, seat.getType());
+                insertPs.setInt(5, seat.getRoom().getRoomId());
+                insertPs.executeUpdate();
+                System.out.println("New seat added successfully!");
+            }
             return true;
 
         } catch (SQLException e) {
@@ -34,42 +53,18 @@ public class SeatDAO extends DBContext {
         }
     }
 
+    // Method to "delete" a seat by setting its status to inactive
     public boolean deleteSeat(int seatId) {
-        String sql = "DELETE FROM Seat WHERE seatId = ?";
+        String sql = "UPDATE Seat SET status = 0 WHERE seatId = ?";
 
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, seatId); // Set the seatId parameter for the SQL statement
-
-            int rowsAffected = ps.executeUpdate(); // Execute delete
-
-            if (rowsAffected > 0) {
-                System.out.println("Seat deleted successfully!");
-                return true;
-            } else {
-                System.out.println("Seat not found.");
-                return false;
-            }
-
-        } catch (SQLException e) {
-            // Handle SQL exception
-            System.out.println("Error when deleting seat: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean changeSeatTypeByID(int seatId, String newType) {
-        String sql = "UPDATE Seat SET [type] = ? WHERE seatId = ?";
-
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, newType);  // Set the new seat type
-            ps.setInt(2, seatId);      // Set the seatId to find the seat
+            ps.setInt(1, seatId); // Set the seatId parameter
 
             int rowsAffected = ps.executeUpdate(); // Execute update
 
             if (rowsAffected > 0) {
-                System.out.println("Seat type updated successfully!");
+                System.out.println("Seat inactivated successfully!");
                 return true;
             } else {
                 System.out.println("Seat not found.");
@@ -77,14 +72,15 @@ public class SeatDAO extends DBContext {
             }
 
         } catch (SQLException e) {
-            System.out.println("Error when updating seat type: " + e.getMessage());
+            System.out.println("Error when inactivating seat: " + e.getMessage());
             return false;
         }
     }
 
+    // Method to retrieve active seats in a room
     public ArrayList<Seat> getListSeatsInRoom(int roomId) {
         ArrayList<Seat> seats = new ArrayList<>();
-        String sql = "SELECT seatId, seatNum, col, [row], [type], roomId FROM Seat WHERE roomId = ?";
+        String sql = "SELECT seatId, seatNum, col, [row], [type], roomId FROM Seat WHERE roomId = ? AND status = 1";
 
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -113,9 +109,10 @@ public class SeatDAO extends DBContext {
         }
         return seats;
     }
-    
+
+    // Method to get a specific active seat by ID
     public Seat getSeatById(int seatId) {
-        String sql = "SELECT seatId, seatNum, col, [row], [type], roomId FROM Seat WHERE seatId = ?";
+        String sql = "SELECT seatId, seatNum, col, [row], [type], roomId FROM Seat WHERE seatId = ? AND status = 1";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, seatId); // Set the seatId parameter
@@ -130,7 +127,7 @@ public class SeatDAO extends DBContext {
                 String type = rs.getString("type");
                 int roomId = rs.getInt("roomId");
 
-                // Assuming Room has a constructor that takes roomId
+                // Assuming RoomDAO has getRoomById
                 RoomDAO roomDAO = new RoomDAO();
                 Room room = roomDAO.getRoomById(roomId);
 
@@ -145,6 +142,30 @@ public class SeatDAO extends DBContext {
             return null;
         }
     }
+
+    public boolean changeSeatTypeByID(int seatId, String newType) {
+        String sql = "UPDATE Seat SET [type] = ? WHERE seatId = ?";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, newType);  // Set the new seat type
+            ps.setInt(2, seatId);      // Set the seatId to find the seat
+
+            int rowsAffected = ps.executeUpdate(); // Execute update
+
+            if (rowsAffected > 0) {
+                System.out.println("Seat type updated successfully!");
+                return true;
+            } else {
+                System.out.println("Seat not found.");
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error when updating seat type: " + e.getMessage());
+            return false;
+        }
+    }
     public static void main(String[] args) {
         SeatDAO seatDAO = new SeatDAO();
 //            Cinema cinema = new Cinema(1, "CGV Saigon", "cgv_logo.png", "72 Lê Thánh Tôn, Q.1, HCM",
@@ -157,7 +178,7 @@ public class SeatDAO extends DBContext {
 //        seatDAO.changeSeatTypeByID(2, "VIP");
 //        System.out.println(seatDAO.getListSeatsInRoom(1));
 //        System.out.println(seatDAO.getSeatById(1));
-            seatDAO.deleteSeat(29);
+        System.out.println(seatDAO.getListSeatsInRoom(1));
     }
 
 

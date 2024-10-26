@@ -1,6 +1,7 @@
 package controller.web;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,8 +14,10 @@ import model.Ticket;
 import repository.SeatDAO;
 import repository.ShowTimeDAO;
 import repository.TicketDAO;
+import utils.Utility;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,19 +32,25 @@ public class DetailShowtimeController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        Gson gson = new Gson();
+        Gson gson =  new GsonBuilder()
+                .registerTypeAdapter(Time.class, new Utility.TimeSerializer())  // Register the custom Time serializer
+                .create();
         JsonObject data = gson.fromJson(request.getReader(), JsonObject.class);
         int showtimeId = data.get("showtimeId").getAsInt();
-        ShowTimeDAO showTimeDAO= new ShowTimeDAO();
-        Showtime showtime = showTimeDAO.getShowtimeById(showtimeId);
+        int roomId = data.get("roomId").getAsInt();
         SeatDAO seatDAO = new SeatDAO();
-        List<Seat> seats= seatDAO.getListSeatsInRoom(showtime.getRoom().getRoomId());
+        List<Seat> seats= seatDAO.getListSeatsInRoom(roomId);
         TicketDAO ticketDAO = new TicketDAO();
         List<Ticket> tickets = ticketDAO.getTicketListOfShowtime(showtimeId);
+        for(Seat seat : seats) {
+            for(Ticket ticket : tickets) {
+                if(seat.getSeatId()==ticket.getSeat().getSeatId()) {
+                    seat.setType("Booked");
+                }
+            }
+        }
         JsonObject responseData = new JsonObject();
-        responseData.add("showtime", gson.toJsonTree(showtime));
         responseData.add("seats", gson.toJsonTree(seats));
-        responseData.add("tickets", gson.toJsonTree(tickets));
         String json = gson.toJson(responseData);
         response.getWriter().println(json);
         response.getWriter().flush();
