@@ -288,6 +288,25 @@ public class AccountDAO extends DBContext {
         }
         return account;
     }
+    public boolean hasPassword(int UID) {
+        String sql = "SELECT password FROM Account WHERE UID = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, UID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getString("password") != null;
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Default to false if password doesn't exist
+    }
+
 
     public Account getAccountByGoogleId(String googleId) {
         Account account = null;
@@ -396,7 +415,6 @@ public class AccountDAO extends DBContext {
 //        }
 //        Account account = accountDAO.getAccountById(1);
 //        System.out.println(account);
-        System.out.println(accountDAO.getAccountByEmail("admin@example.com"));
-        System.out.println(accountDAO.login("admin@example.com", "adminpass"));
+        System.out.println(accountDAO.login("giangntde180915@fpt.edu.vn",null));
     }
 }
