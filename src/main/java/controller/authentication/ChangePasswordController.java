@@ -15,7 +15,17 @@ import java.io.IOException;
 public class ChangePasswordController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
+        int UID = Integer.parseInt(request.getParameter("UID")); // Get UID from the request
+
+        JsonObject jsonResponse = new JsonObject();
+        AccountDAO accountDAO = new AccountDAO();
+        boolean hasPassword = accountDAO.hasPassword(UID);
+        jsonResponse.addProperty("hasPassword", hasPassword);
+
+        response.getWriter().write(jsonResponse.toString());
     }
 
     @Override
