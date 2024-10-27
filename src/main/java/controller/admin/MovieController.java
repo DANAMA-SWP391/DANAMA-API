@@ -1,6 +1,8 @@
 package controller.admin;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,8 +10,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Cinema;
+import model.Genre;
 import model.Movie;
 import repository.CinemaDAO;
+import repository.GenreDAO;
 import repository.MovieDAO;
 
 import java.io.IOException;
@@ -24,72 +28,94 @@ public class MovieController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         Gson gson = new Gson();
-        MovieDAO dao = new MovieDAO();
-        List<Movie> movies = dao.getAllMovieList();
+        MovieDAO movieDao = new MovieDAO();
+        GenreDAO genreDao = new GenreDAO();
 
+        // Retrieve all movies including their genres
+        List<Movie> movies = movieDao.getAllMovieList();
+
+        // Retrieve all genres
+        List<Genre> genres = genreDao.getAllGenres();
+
+        // Prepare JSON response
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("movies", gson.toJsonTree(movies));
-        String json = gson.toJson(jsonObject);
+        jsonObject.add("movies", gson.toJsonTree(movies));  // Serialize the list of movies
+        jsonObject.add("genres", gson.toJsonTree(genres));  // Serialize the list of genres
 
-        response.getWriter().write(json);
+        // Write the response
+        response.getWriter().write(gson.toJson(jsonObject));
         response.getWriter().flush();
         response.getWriter().close();
     }
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         Gson gson = new Gson();
         JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class);
-        String action = jsonObject.get("action").getAsString();
         System.out.println(jsonObject);
+        String action = jsonObject.get("action").getAsString();
         MovieDAO dao = new MovieDAO();
         boolean result = false;
+        JsonObject jsonResponse = new JsonObject();
 
         try {
             switch (action) {
                 case "add":
+                    // Chuyển đổi JSON thành đối tượng Movie
                     Movie movie = gson.fromJson(jsonObject.get("movie"), Movie.class);
+
+                    // Thêm phim và xử lý genres bên trong hàm addMovie
                     result = dao.addMovie(movie);
-                    System.out.println("Add movie result: " + result);
+
+                    // Trả về kết quả
+                    jsonResponse.addProperty("success", result);
                     break;
 
                 case "delete":
-                    int movieIdDelete = jsonObject.get("movie").getAsJsonObject().get("movieId").getAsInt();
-                    result = dao.deleteMovie(movieIdDelete);
-                    if (!result) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        response.getWriter().write("{\"error\": \"Movie not found\"}");
-                        return;
+                    Movie movieDelete = gson.fromJson(jsonObject.get("movie"), Movie.class);
+                    result = dao.deleteMovie(movieDelete.getMovieId());
+
+                    // Xóa liên kết giữa Movie và Genre trong bảng MovieGenre
+                    if (result) {
+                        dao.deleteMovieGenres(movieDelete.getMovieId());
                     }
+
+                    jsonResponse.addProperty("success", result);
                     break;
 
                 case "update":
                     Movie movieUpdate = gson.fromJson(jsonObject.get("movie"), Movie.class);
-                    result = dao.updateMovieByID(movieUpdate.getMovieId(), movieUpdate);
-                    if (!result) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        response.getWriter().write("{\"error\": \"Movie not found or update failed\"}");
-                        return;
+                    System.out.println(movieUpdate);
+
+                    // Cập nhật movie
+                    result = dao.updateMovie(movieUpdate);
+
+                    // Thêm phản hồi về kết quả
+                    jsonResponse.addProperty("success", result);
+                    break;
+                case "view":
+                    Movie movieView = gson.fromJson(jsonObject.get("movie"), Movie.class);  // Chuyển đổi JSON thành đối tượng Movie
+                    Movie foundMovie = dao.getMovieById(movieView.getMovieId());  // Lấy movieId từ đối tượng movie và tìm kiếm trong cơ sở dữ liệu
+                    if (foundMovie != null) {
+                        jsonResponse.add("movie", gson.toJsonTree(foundMovie));  // Nếu tìm thấy phim, thêm movie vào JSON response
+                        jsonResponse.addProperty("success", true);  // Báo hiệu thành công
+                    } else {
+                        jsonResponse.addProperty("success", false);  // Nếu không tìm thấy phim
                     }
                     break;
 
                 default:
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("{\"error\": \"Invalid action\"}");
-                    return;
+                    jsonResponse.addProperty("success", false);
             }
-
-            response.getWriter().write("{\"success\":" + result + "}");
-
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        } finally {
-            response.getWriter().flush();
-            response.getWriter().close();
+            jsonResponse.addProperty("error", e.getMessage());
         }
+
+        response.getWriter().write(gson.toJson(jsonResponse));
+        response.getWriter().flush();
+        response.getWriter().close();
     }
+
 }
