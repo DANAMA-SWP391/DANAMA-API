@@ -39,7 +39,7 @@ public class ShowTimeDAO extends DBContext {
         ArrayList<Showtime> showtimes = new ArrayList<>();
 
         String sql = "SELECT showtimeId, showdate, starttime, endtime, baseprice, movieId, roomId, status " +
-                "FROM Showtime";
+                "FROM Showtime where status = 1";
         RoomDAO roomDAO = new RoomDAO();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -54,7 +54,6 @@ public class ShowTimeDAO extends DBContext {
                 showtime.setBasePrice(resultSet.getDouble("baseprice"));
                 showtime.setSeatAvailable(getSeatAvailableById(showtime.getShowtimeId()));
                 showtime.setStatus(resultSet.getInt("status"));
-
                 // Retrieve Movie using movieId and set it in the Showtime object
 
                 Movie movie = new Movie();
@@ -472,5 +471,8 @@ public class ShowTimeDAO extends DBContext {
 //        for(Showtime s: dao.getListShowtimes()) {
 //            System.out.println(s.getSeatAvailable());
 //        }
+        for(Showtime showtime: dao.getListShowtimes()) {
+            System.out.println(showtime);
+        }
     }
 }

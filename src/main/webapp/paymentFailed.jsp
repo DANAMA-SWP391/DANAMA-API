@@ -3,13 +3,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Thank You</title>
+    <title>Payment Failed</title>
     <style>
         /* Reset and universal styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Albert Sans regular', sans-serif;
             font-size: 16px;
         }
 
@@ -42,7 +43,7 @@
         /* Message styles */
         .message-line {
             font-size: 1.2em;
-            color: #333;
+            color: #D9534F; /* Red color for error */
             margin-top: 10px;
         }
     </style>
@@ -52,10 +53,10 @@
     <!-- Website Logo -->
     <h1 class="logo">DANAMA</h1>
 
-    <!-- Thank You Message in 3 lines -->
-    <div class="message-line">Thank You for Your Booking!</div>
-    <div class="message-line">Your booking confirmation email has been sent.</div>
-    <div class="message-line">You can now close this tab.</div>
+    <!-- Payment Failed Message in 3 lines -->
+    <div class="message-line">Payment Failed</div>
+    <div class="message-line">We’re sorry, but there was an error processing your payment.</div>
+    <div class="message-line">Please try again or contact support if the issue persists.</div>
 </div>
 </body>
 </html>
