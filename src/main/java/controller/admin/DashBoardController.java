@@ -14,9 +14,7 @@ import repository.ShowTimeDAO;
 
 import java.io.IOException;
 import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @WebServlet(name = "DashBoardController", value = "/adminDashBoard")
 public class DashBoardController extends HttpServlet {
@@ -30,7 +28,22 @@ public class DashBoardController extends HttpServlet {
 
         // Fetch Top 5 Movies
         MovieDAO movieDAO = new MovieDAO();
-        ArrayList<Movie> movies = movieDAO.getTop5MostWatchedMovies();
+        List<Object[]> moviesData = movieDAO.getMostWatchedMovies_Admin();
+
+// Tạo một list mới để chứa các movie object đã chuyển đổi thành JSON-friendly objects
+        List<Map<String, Object>> movies = new ArrayList<>();
+
+        for (Object[] movieData : moviesData) {
+            Map<String, Object> movie = new HashMap<>();
+            movie.put("name", movieData[0]); // Tên phim
+            movie.put("poster", movieData[1]); // Đường dẫn poster
+            movie.put("totalTicketsSold", movieData[2]); // Tổng số vé bán ra
+            movie.put("totalRevenue", movieData[3]); // Tổng doanh thu
+
+            movies.add(movie);
+        }
+
+// Sử dụng Gson để chuyển list movies thành JSON
         responseObject.add("movies", gson.toJsonTree(movies));
 
         // Fetch Most Popular Showtimes

@@ -107,33 +107,34 @@ public class CinemaDAO extends DBContext {
         return cinema;
     }
 
-    public boolean updateCinemaByID(int cinemaId, Cinema cinema) {
+    public boolean updateCinema(Cinema cinema) {
         String sql = "UPDATE Cinema SET name = ?, logo = ?, address = ?, description = ?, image = ?, managerId = ? WHERE cinemaId = ?";
 
-        PreparedStatement ps = null;
-
-        try {
-            ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            // Thiết lập các tham số từ đối tượng Cinema
             ps.setString(1, cinema.getName());
             ps.setString(2, cinema.getLogo());
             ps.setString(3, cinema.getAddress());
             ps.setString(4, cinema.getDescription());
             ps.setString(5, cinema.getImage());
             ps.setInt(6, cinema.getManagerId());
-            ps.setInt(7, cinemaId);
+            ps.setInt(7, cinema.getCinemaId()); // Lấy cinemaId từ đối tượng Cinema
+
+            // Log để kiểm tra giá trị các tham số
+            System.out.println("Updating cinema with ID: " + cinema.getCinemaId());
+            System.out.println("Name: " + cinema.getName());
+            System.out.println("Address: " + cinema.getAddress());
 
             int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
 
+            // Log số hàng bị ảnh hưởng
+            System.out.println("Rows affected: " + rowsAffected);
+
+            return rowsAffected > 0;
         } catch (SQLException e) {
+            System.err.println("SQL Error during cinema update:");
             e.printStackTrace();
             return false;
-        } finally {
-            try {
-                if (ps != null) ps.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -252,6 +253,18 @@ public class CinemaDAO extends DBContext {
 
     //Testing
     public static void main(String[] args) {
+//        CinemaDAO cinemaDAO = new CinemaDAO();
+//        Cinema cinema  = new Cinema();
+//        cinema.setName("mmmmm");
+//        cinema.setCinemaId(17);
+//        cinema.setLogo("logo");
+//        cinema.setAddress("address");
+//        cinema.setDescription("description");
+//        cinema.setImage("image");
+//        cinema.setManagerId(1);
+////        cinemaDAO.addCinema(cinema);
+////
+//        cinemaDAO.updateCinemaByID(17, cinema);
 /*        CinemaDAO cinemaDAO = new CinemaDAO();
 
         // Gọi hàm getTotalRevenueForAllCinemas() và lưu kết quả vào danh sách
