@@ -17,7 +17,7 @@ public class JwtUtil {
     // Method to generate JWT token
     public static String generateToken(String subject) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 60 * 60 * 1000);
+        Date expiryDate = new Date(now.getTime() + 120 * 60 * 1000);
 
         return Jwts.builder()
                 .setSubject(subject)
@@ -42,7 +42,7 @@ public class JwtUtil {
     // Method to check if token is within 30 minutes of expiration
     public static boolean isTokenExpired(Claims claims) {
         // Calculate the time 30 minutes before the expiration
-        Date thirtyMinutesBeforeExpiry = new Date(claims.getExpiration().getTime() - 30 * 60 * 1000);
+        Date thirtyMinutesBeforeExpiry = new Date(claims.getExpiration().getTime() - 60 * 60 * 1000);
         // Check if the current time is after this calculated time
         return new Date().after(thirtyMinutesBeforeExpiry);
     }
