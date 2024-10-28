@@ -9,6 +9,7 @@ import java.io.IOException;
 
 @WebFilter("/*") // Apply this filter to all URLs
 public class CORSFilter implements Filter {
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // Filter initialization code if needed
@@ -22,7 +23,7 @@ public class CORSFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         // Add CORS headers to the response
-        httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // Your front-end URL
+        httpResponse.setHeader("Access-Control-Allow-Origin", "*"); // Your front-end URL
         httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         httpResponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
         httpResponse.setHeader("Access-Control-Allow-Credentials", "true"); // If you need to allow cookies
@@ -42,4 +43,3 @@ public class CORSFilter implements Filter {
         // Clean up any resources if needed
     }
 }
-

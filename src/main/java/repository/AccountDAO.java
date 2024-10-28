@@ -44,7 +44,7 @@ public class AccountDAO extends DBContext {
     }
 
     public boolean updateAccountByID(int accountId, Account account) {
-        String sql = "UPDATE Account SET name = ?, email = ?, phone = ?, avatar = ?, googleId = ?, roleId = ?, password = ? WHERE UID = ?";
+        String sql = "UPDATE Account SET name = ?, email = ?, phone = ?, avatar = ?, googleId = ?, roleId = ? WHERE UID = ?";
 
         PreparedStatement ps = null;
 
@@ -56,8 +56,7 @@ public class AccountDAO extends DBContext {
             ps.setString(4, account.getAvatar());
             ps.setString(5, account.getGoogleId());
             ps.setInt(6, account.getRoleId());
-            ps.setString(7, account.getPassword());
-            ps.setInt(8, accountId);
+            ps.setInt(7, accountId);
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
