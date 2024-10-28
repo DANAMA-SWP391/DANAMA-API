@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <title>Payment Failed</title>
     <style>
+        @font-face {
+            font-family: 'Mogra';
+            src: url('../assets/Mogra-Regular.ttf') format('truetype');
+        }
         /* Reset and universal styles */
         * {
             margin: 0;
@@ -46,6 +50,7 @@
             color: #D9534F; /* Red color for error */
             margin-top: 10px;
         }
+
     </style>
 </head>
 <body>
