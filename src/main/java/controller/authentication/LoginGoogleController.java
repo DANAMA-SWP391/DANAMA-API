@@ -60,28 +60,29 @@ public class LoginGoogleController extends HttpServlet {
             String avatar = (String) payload.get("picture");
 
             AccountDAO accountDAO = new AccountDAO();
-            Account existingAccount = accountDAO.getAccountByGoogleId(googleId);
+            Account account = accountDAO.getAccountByEmail(email);
 
-            if (existingAccount == null) {
-                Account newAccount = new Account();
-                newAccount.setGoogleId(googleId);
-                newAccount.setName(name);
-                newAccount.setEmail(email);
-                newAccount.setAvatar(avatar);
-                newAccount.setPhone(null);
-                newAccount.setRoleId(3);
-                newAccount.setPassword(null);
+            if (account == null) {
+                account = new Account();
+                account.setGoogleId(googleId);
+                account.setName(name);
+                account.setEmail(email);
+                account.setAvatar(avatar);
+                account.setPhone(null);
+                account.setRoleId(3);
+                account.setPassword(null);
 
-                boolean accountAdded = accountDAO.addAccount(newAccount); // Add the new account
+                boolean accountAdded = accountDAO.addAccount(account); // Add the new account
                 if (!accountAdded) {
                     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     responseData.addProperty("error", "Failed to create new account.");
                     response.getWriter().write(gson.toJson(responseData));
                     return;
                 }
+            } else {
+                account.setGoogleId(googleId);
+                accountDAO.updateAccountByID(account.getUID(), account);
             }
-
-            Account account = accountDAO.getAccountByGoogleId(googleId);
             String jwtToken = JwtUtil.generateToken(account.getEmail());
 
             responseData.addProperty("jwtToken", jwtToken);
