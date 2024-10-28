@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class BookingDAO extends DBContext {
     public Booking getBookingById(int bookingId) {
@@ -421,26 +422,158 @@ public class BookingDAO extends DBContext {
         return bookingDetail;
     }
 
+    public boolean addBookingWithTickets(Booking booking, List<Ticket> tickets) {
+        try {
+            connection.setAutoCommit(false);
+            // Insert booking
+            String sqlBooking = "INSERT INTO Booking (totalCost, timestamp, UID, status) VALUES (?, ?, ?, ?)";
+            PreparedStatement psBooking = connection.prepareStatement(sqlBooking, Statement.RETURN_GENERATED_KEYS);
+            psBooking.setDouble(1, booking.getTotalCost());
+            psBooking.setTimestamp(2, new Timestamp(booking.getTimestamp().getTime()));
+            psBooking.setInt(3, booking.getUser().getUID());
+            psBooking.setInt(4, booking.getStatus());
+            int rowsAffected = psBooking.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("Creating booking failed, no rows affected.");
+            }
+
+            // Get the generated booking ID
+            ResultSet generatedKeys = psBooking.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                booking.setBookingId(generatedKeys.getInt(1));
+            } else {
+                throw new SQLException("Creating booking failed, no ID obtained.");
+            }
+
+            // Prepare ticket insertion
+            String sqlTicket = "INSERT INTO Ticket (price, name, email, phone, bookingId, showtimeId, seatId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement psTicket = connection.prepareStatement(sqlTicket);
+
+            for (Ticket ticket : tickets) {
+                // Check if seat is already booked
+                if (isSeatBooked(connection, ticket.getShowtime().getShowtimeId(), ticket.getSeat().getSeatId())) {
+                    // Seat is already booked, rollback and return false
+                    connection.rollback();
+                    return false;
+                }
+
+                // Set ticket parameters
+                psTicket.setDouble(1, ticket.getPrice());
+                psTicket.setString(2, ticket.getName());
+                psTicket.setString(3, ticket.getEmail());
+                psTicket.setString(4, ticket.getPhone());
+                psTicket.setInt(5, booking.getBookingId());
+                psTicket.setInt(6, ticket.getShowtime().getShowtimeId());
+                psTicket.setInt(7, ticket.getSeat().getSeatId());
+                psTicket.addBatch();
+            }
+
+            // Execute batch insert for tickets
+            int[] ticketRowsAffected = psTicket.executeBatch();
+            for (int i : ticketRowsAffected) {
+                if (i == 0) {
+                    // Ticket insertion failed, rollback and return false
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            // Commit transaction
+            connection.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    connection.rollback(); // Rollback on error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true); // Reset auto-commit
+                    connection.close(); // Close connection
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    // Method to check if a seat is already booked
+    private boolean isSeatBooked(Connection connection, int showtimeId, int seatId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Ticket WHERE showtimeId = ? AND seatId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, showtimeId);
+            ps.setInt(2, seatId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0;
+            }
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
+        // Create an instance of BookingDAO
         BookingDAO bookingDAO = new BookingDAO();
-        BookingDetail bookingDetail = bookingDAO.getBookingDetailById(45);
-//        SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm:ss.SSSSSSS");
-//        SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm");
-//
-//        // Format showtimeStart and showtimeEnd to "HH:mm" format
-//        String formattedShowtimeStart = bookingDetail.getShowtimeStart();
-//        String formattedShowtimeEnd = bookingDetail.getShowtimeEnd();
-//
-//        try {
-//            // Parse the input strings and format them to "HH:mm"
-//            Date startDate = inputFormat.parse(bookingDetail.getShowtimeStart());
-//            Date endDate = inputFormat.parse(bookingDetail.getShowtimeEnd());
-//            formattedShowtimeStart = outputFormat.format(startDate);
-//            formattedShowtimeEnd = outputFormat.format(endDate);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//            // If parsing fails, use the original string values
-//        }
-//        System.out.println(formattedShowtimeStart + "-" + formattedShowtimeEnd);
+
+        // Create a Booking object
+        Booking booking = new Booking();
+        booking.setTotalCost(50.0);
+        booking.setTimestamp(new Date()); // Current date and time
+        Account user = new Account();
+        user.setUID(1); // Replace with a valid UID from your Account table
+        booking.setUser(user);
+        booking.setStatus(0); // Set the appropriate status
+
+        // Create a list to hold Ticket objects
+        List<Ticket> tickets = new ArrayList<>();
+
+        // Create Ticket 1
+        Ticket ticket1 = new Ticket();
+        ticket1.setPrice(25.0);
+        ticket1.setName("John Doe");
+        ticket1.setEmail("john.doe@example.com");
+        ticket1.setPhone("1234567890");
+        // Set the showtime (replace with valid showtimeId)
+        Showtime showtime = new Showtime();
+        showtime.setShowtimeId(1); // Replace with a valid showtimeId
+        ticket1.setShowtime(showtime);
+        // Set the seat (replace with valid seatId)
+        Seat seat1 = new Seat();
+        seat1.setSeatId(76); // Replace with a valid seatId
+        ticket1.setSeat(seat1);
+
+        // Create Ticket 2
+        Ticket ticket2 = new Ticket();
+        ticket2.setPrice(25.0);
+        ticket2.setName("Jane Doe");
+        ticket2.setEmail("jane.doe@example.com");
+        ticket2.setPhone("0987654321");
+        ticket2.setShowtime(showtime); // Same showtime
+        Seat seat2 = new Seat();
+        seat2.setSeatId(77); // Replace with a valid seatId
+        ticket2.setSeat(seat2);
+
+        // Add tickets to the list
+        tickets.add(ticket1);
+        tickets.add(ticket2);
+
+        // Call the addBookingWithTickets method
+        boolean success = bookingDAO.addBookingWithTickets(booking, tickets);
+
+        // Print the result
+        if (success) {
+            System.out.println("Booking successful. Booking ID: " + booking.getBookingId());
+        } else {
+            System.out.println("Booking failed. Some seats may already be booked.");
+        }
     }
 }

@@ -44,37 +44,33 @@ public class BookingController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-        JsonObject data= gson.fromJson(request.getReader(), JsonObject.class);
+        JsonObject data = gson.fromJson(request.getReader(), JsonObject.class);
         System.out.println(data);
         Booking booking = gson.fromJson(data.get("booking"), Booking.class);
         JsonArray ticketsJson = data.get("tickets").getAsJsonArray();
 
         BookingDAO bookingDAO = new BookingDAO();
-        boolean success = true;
         JsonObject responseData = new JsonObject();
-        if(!bookingDAO.addBooking(booking)) {
-            success = false;
+
+        // Deserialize tickets
+        List<Ticket> tickets = new ArrayList<>();
+        for (JsonElement ticketElement : ticketsJson) {
+            Ticket t = gson.fromJson(ticketElement, Ticket.class);
+            tickets.add(t);
         }
-        else {
-            booking= bookingDAO.getNewestBookingByUser(booking.getUser().getUID());
+
+        // Attempt to add booking with tickets
+        boolean success = bookingDAO.addBookingWithTickets(booking, tickets);
+        if (success) {
             responseData.addProperty("bookingId", booking.getBookingId());
-            List<Ticket> tickets = new ArrayList<>();
-            for(JsonElement ticket : ticketsJson){
-                Ticket t = gson.fromJson(ticket, Ticket.class);
-                t.setBooking(booking);
-                tickets.add(t);
-            }
-            TicketDAO ticketDAO = new TicketDAO();
-            for(Ticket t : tickets){
-                if(!ticketDAO.addTicket(t)){
-                    success = false;
-                }
-            }
-            success = true;
+        } else {
+            responseData.addProperty("error", "Some seats are already booked. Booking failed.");
         }
+
         responseData.addProperty("success", success);
         String json = gson.toJson(responseData);
         response.getWriter().write(json);
         response.getWriter().flush();
     }
+
 }

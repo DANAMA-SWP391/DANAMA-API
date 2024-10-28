@@ -146,6 +146,7 @@ CREATE TABLE Ticket
     bookingId  INT,
     showtimeId INT,
     seatId     INT,
+    CONSTRAINT UC_Ticket UNIQUE (showtimeId, seatId),
     CONSTRAINT FK_Ticket_Booking_bookingId FOREIGN KEY (bookingId) REFERENCES Booking (bookingId),
     CONSTRAINT FK_Ticket_Showtime_showtimeId FOREIGN KEY (showtimeId) REFERENCES Showtime (showtimeId),
     CONSTRAINT FK_Ticket_Seat_seatId FOREIGN KEY (seatId) REFERENCES Seat (seatId)
