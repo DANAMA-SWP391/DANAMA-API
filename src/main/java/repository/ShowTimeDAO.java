@@ -23,7 +23,9 @@ public class ShowTimeDAO extends DBContext {
             preparedStatement.setDouble(4, Showtime.getBasePrice());
             preparedStatement.setInt(5, Showtime.getMovie().getMovieId());
             preparedStatement.setInt(6, Showtime.getRoom().getRoomId());
-            preparedStatement.setInt(7, Showtime.getStatus());
+//            preparedStatement.setInt(7, Showtime.getStatus());
+            preparedStatement.setInt(7, 1); // Set status to always be 1
+
 
             int affectedRows = preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -83,7 +85,7 @@ public class ShowTimeDAO extends DBContext {
         String sql = "SELECT s.showtimeId, s.showdate, s.starttime, s.endtime, s.baseprice, s.movieId, s.roomId, s.status " +
                 "FROM Showtime s " +
                 "JOIN Room r ON s.roomId = r.roomId " +
-                "WHERE r.cinemaId = ?";
+                "WHERE r.cinemaId = ? AND s.status = 1";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
