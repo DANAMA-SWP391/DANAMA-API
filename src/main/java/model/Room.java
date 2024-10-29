@@ -5,17 +5,23 @@ public class Room {
     private String name;
     private int numberOfSeat;
     private Cinema cinema;
+    private int numberOfRows;
+    private int numberOfColumns;
 
     // Default constructor
     public Room() {
     }
 
     // Parameterized constructor
-    public Room(int roomId, String name, int numberOfSeat, Cinema cinema) {
-        this.roomId = roomId;
-        this.name = name;
-        this.numberOfSeat = numberOfSeat;
+
+
+    public Room(Cinema cinema, int roomId, int numberOfSeat, int numberOfRows, int numberOfColumns, String name) {
         this.cinema = cinema;
+        this.roomId = roomId;
+        this.numberOfSeat = numberOfSeat;
+        this.numberOfRows = numberOfRows;
+        this.numberOfColumns = numberOfColumns;
+        this.name = name;
     }
 
     public Room(String name, int numberOfSeat, Cinema cinema) {
@@ -57,6 +63,22 @@ public class Room {
         this.cinema = cinema;
     }
 
+    public int getNumberOfRows() {
+        return numberOfRows;
+    }
+
+    public void setNumberOfRows(int numberOfRows) {
+        this.numberOfRows = numberOfRows;
+    }
+
+    public int getNumberOfColumns() {
+        return numberOfColumns;
+    }
+
+    public void setNumberOfColumns(int numberOfColumns) {
+        this.numberOfColumns = numberOfColumns;
+    }
+
     @Override
     public String toString() {
         return "Room{" +
@@ -64,6 +86,8 @@ public class Room {
                 ", roomId=" + roomId +
                 ", name='" + name + '\'' +
                 ", numberOfSeat=" + numberOfSeat +
+                ", numberOfRows=" + numberOfRows +
+                ", numberOfColumns=" + numberOfColumns +
                 '}';
     }
 }
