@@ -15,7 +15,7 @@ public class ShowtimeCleanupListener implements ServletContextListener {
         scheduler = Executors.newSingleThreadScheduledExecutor();
 
         // Schedule the ShowtimeCleanupTask to run every 24 hours
-        scheduler.scheduleAtFixedRate(new ShowtimeCleanupTask(), 0, 30, TimeUnit.MINUTES); // Daily check
+        scheduler.scheduleAtFixedRate(new ShowtimeCleanupTask(), 0, 180, TimeUnit.MINUTES); // Daily check
     }
 
     @Override

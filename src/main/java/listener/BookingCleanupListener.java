@@ -14,7 +14,7 @@ public class BookingCleanupListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(new BookingCleanupTask(), 0, 1, TimeUnit.MINUTES); // Check every minute
+        scheduler.scheduleAtFixedRate(new BookingCleanupTask(), 0, 5, TimeUnit.MINUTES); // Check every 5 minutes
     }
 
     @Override
