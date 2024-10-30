@@ -519,61 +519,45 @@ public class BookingDAO extends DBContext {
         }
         return false;
     }
+    public boolean isBookingPending(int bookingId) {
+        String query = "SELECT status FROM Booking WHERE bookingId = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, bookingId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                int status = resultSet.getInt("status");
+                return status != 1; // Return true if status is pending (not paid)
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public void deleteBookingWithTickets(int bookingId) {
+        try {
+            // Delete associated tickets first
+            String deleteTicketsQuery = "DELETE FROM Ticket WHERE bookingId = ?";
+            try (PreparedStatement deleteTicketsStatement = connection.prepareStatement(deleteTicketsQuery)) {
+                deleteTicketsStatement.setInt(1, bookingId);
+                deleteTicketsStatement.executeUpdate();
+            }
+
+            // Then delete the booking itself
+            String deleteBookingQuery = "DELETE FROM Booking WHERE bookingId = ?";
+            try (PreparedStatement deleteBookingStatement = connection.prepareStatement(deleteBookingQuery)) {
+                deleteBookingStatement.setInt(1, bookingId);
+                deleteBookingStatement.executeUpdate();
+            }
+
+            System.out.println("Booking " + bookingId + " has been deleted.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
-        // Create an instance of BookingDAO
         BookingDAO bookingDAO = new BookingDAO();
-
-        // Create a Booking object
-        Booking booking = new Booking();
-        booking.setTotalCost(50.0);
-        booking.setTimestamp(new Date()); // Current date and time
-        Account user = new Account();
-        user.setUID(1); // Replace with a valid UID from your Account table
-        booking.setUser(user);
-        booking.setStatus(0); // Set the appropriate status
-
-        // Create a list to hold Ticket objects
-        List<Ticket> tickets = new ArrayList<>();
-
-        // Create Ticket 1
-        Ticket ticket1 = new Ticket();
-        ticket1.setPrice(25.0);
-        ticket1.setName("John Doe");
-        ticket1.setEmail("john.doe@example.com");
-        ticket1.setPhone("1234567890");
-        // Set the showtime (replace with valid showtimeId)
-        Showtime showtime = new Showtime();
-        showtime.setShowtimeId(1); // Replace with a valid showtimeId
-        ticket1.setShowtime(showtime);
-        // Set the seat (replace with valid seatId)
-        Seat seat1 = new Seat();
-        seat1.setSeatId(76); // Replace with a valid seatId
-        ticket1.setSeat(seat1);
-
-        // Create Ticket 2
-        Ticket ticket2 = new Ticket();
-        ticket2.setPrice(25.0);
-        ticket2.setName("Jane Doe");
-        ticket2.setEmail("jane.doe@example.com");
-        ticket2.setPhone("0987654321");
-        ticket2.setShowtime(showtime); // Same showtime
-        Seat seat2 = new Seat();
-        seat2.setSeatId(77); // Replace with a valid seatId
-        ticket2.setSeat(seat2);
-
-        // Add tickets to the list
-        tickets.add(ticket1);
-        tickets.add(ticket2);
-
-        // Call the addBookingWithTickets method
-        boolean success = bookingDAO.addBookingWithTickets(booking, tickets);
-
-        // Print the result
-        if (success) {
-            System.out.println("Booking successful. Booking ID: " + booking.getBookingId());
-        } else {
-            System.out.println("Booking failed. Some seats may already be booked.");
-        }
+        bookingDAO.deleteBookingWithTickets(78);
     }
 }
