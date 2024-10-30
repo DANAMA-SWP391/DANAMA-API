@@ -44,8 +44,13 @@ public class DetailShowtimeController extends HttpServlet {
         List<Ticket> tickets = ticketDAO.getTicketListOfShowtime(showtimeId);
         for(Seat seat : seats) {
             for(Ticket ticket : tickets) {
-                if(seat.getSeatId()==ticket.getSeat().getSeatId()) {
-                    seat.setType("Booked");
+                if (seat.getSeatId() == ticket.getSeat().getSeatId()) {
+                    // Check if the seat is a couple seat before setting the type
+                    if ("Couple".equals(seat.getType())) {
+                        seat.setType("Booked-Couple");
+                    } else {
+                        seat.setType("Booked");
+                    }
                 }
             }
         }
