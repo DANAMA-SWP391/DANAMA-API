@@ -151,3 +151,18 @@ CREATE TABLE Ticket
     CONSTRAINT FK_Ticket_Showtime_showtimeId FOREIGN KEY (showtimeId) REFERENCES Showtime (showtimeId),
     CONSTRAINT FK_Ticket_Seat_seatId FOREIGN KEY (seatId) REFERENCES Seat (seatId)
 );
+
+CREATE TABLE MovieRequest (
+    requestId INT PRIMARY KEY IDENTITY (1,1),
+    cinemaId INT NOT NULL,
+    movieId INT NOT NULL,
+    status TINYINT NOT NULL, -- 0: Pending, 1: Approved
+    message VARCHAR(255), -- Lời nhắn của cinema manager
+    timestamp DATETIME DEFAULT GETDATE() , -- Thời gian tạo yêu cầu
+    FOREIGN KEY (cinemaId) REFERENCES Cinema(cinemaId) ON DELETE CASCADE,
+    FOREIGN KEY (movieId) REFERENCES Movie(movieId) ON DELETE CASCADE
+);
+
+
+
+

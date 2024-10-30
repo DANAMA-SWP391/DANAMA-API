@@ -15,6 +15,9 @@ public class Genre {
     public int getGenreId() {
         return genreId;
     }
+    public void setGenreId(int movieId) {
+        this.genreId = genreId;
+    }
 
     public String getName() {
         return name;
