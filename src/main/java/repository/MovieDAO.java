@@ -7,14 +7,13 @@ package repository;
 import context.DBContext;
 import model.Genre;
 import model.Movie;
+import model.MovieRequest;
 
-import java.sql.Statement;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
+import java.util.Date;
 
 public class MovieDAO extends DBContext {
     private GenreDAO genreDAO = new GenreDAO(); // Sử dụng GenreDAO để lấy genres
@@ -197,8 +196,6 @@ public class MovieDAO extends DBContext {
 
         return movie;
     }
-
-
     public boolean addMovie(Movie movie) {
         String sql = "INSERT INTO Movie (name, description, poster, trailer, releasedate, country, director, agerestricted, actors, duration, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -253,7 +250,230 @@ public class MovieDAO extends DBContext {
         }
     }
 
+    public Map<String, Object> getMovieRequestWithDetails(int requestId) {
+        Map<String, Object> result = new HashMap<>();
+        MovieRequest movieRequest = null;
+        Movie movie = null;
 
+        String requestSql = "SELECT requestId, cinemaId, movieId, status, message, timestamp " +
+                "FROM MovieRequest WHERE requestId = ?";
+        String movieSql = "SELECT movieId, name, description, poster, trailer, releasedate, country, " +
+                "director, agerestricted, actors, duration, status " +
+                "FROM Movie WHERE movieId = ?";
+        String genresSql = "SELECT g.genreId, g.name FROM Genre g " +
+                "JOIN MovieGenre mg ON g.genreId = mg.genreId " +
+                "WHERE mg.movieId = ?";
+
+        try {
+            // Truy vấn thông tin MovieRequest
+            try (PreparedStatement psRequest = connection.prepareStatement(requestSql)) {
+                psRequest.setInt(1, requestId);
+                try (ResultSet rsRequest = psRequest.executeQuery()) {
+                    if (rsRequest.next()) {
+                        // Khởi tạo đối tượng MovieRequest
+                        movieRequest = new MovieRequest();
+                        movieRequest.setRequestId(rsRequest.getInt("requestId"));
+                        movieRequest.setCinemaId(rsRequest.getInt("cinemaId"));
+                        movieRequest.setMovieId(rsRequest.getInt("movieId"));
+                        movieRequest.setStatus(rsRequest.getInt("status"));
+                        movieRequest.setMessage(rsRequest.getString("message"));
+                        movieRequest.setTimestamp(rsRequest.getDate("timestamp"));
+                    }
+                }
+            }
+
+            // Nếu tìm thấy MovieRequest, truy vấn thông tin Movie tương ứng
+            if (movieRequest != null) {
+                try (PreparedStatement psMovie = connection.prepareStatement(movieSql)) {
+                    psMovie.setInt(1, movieRequest.getMovieId());
+                    try (ResultSet rsMovie = psMovie.executeQuery()) {
+                        if (rsMovie.next()) {
+                            // Khởi tạo đối tượng Movie
+                            movie = new Movie();
+                            movie.setMovieId(rsMovie.getInt("movieId"));
+                            movie.setName(rsMovie.getString("name"));
+                            movie.setDescription(rsMovie.getString("description"));
+                            movie.setPoster(rsMovie.getString("poster"));
+                            movie.setTrailer(rsMovie.getString("trailer"));
+                            movie.setReleaseDate(rsMovie.getDate("releasedate"));
+                            movie.setCountry(rsMovie.getString("country"));
+                            movie.setDirector(rsMovie.getString("director"));
+                            movie.setAgeRestricted(rsMovie.getInt("agerestricted"));
+                            movie.setActors(rsMovie.getString("actors"));
+                            movie.setDuration(rsMovie.getInt("duration"));
+                            movie.setStatus(rsMovie.getInt("status"));
+
+                            // Lấy genres của phim
+                            List<Genre> genres = new ArrayList<>();
+                            try (PreparedStatement psGenres = connection.prepareStatement(genresSql)) {
+                                psGenres.setInt(1, movie.getMovieId());
+                                try (ResultSet rsGenres = psGenres.executeQuery()) {
+                                    while (rsGenres.next()) {
+                                        Genre genre = new Genre();
+                                        genre.setGenreId(rsGenres.getInt("genreId"));
+                                        genre.setName(rsGenres.getString("name"));
+                                        genres.add(genre);
+                                    }
+                                }
+                            }
+                            movie.setGenres(genres); // Gán genres vào movie
+                        }
+                    }
+                }
+            }
+
+            // Thêm cả MovieRequest và Movie vào kết quả trả về
+            result.put("movieRequest", movieRequest);
+            result.put("movie", movie);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result; // Trả về một map chứa thông tin MovieRequest và Movie
+    }
+    public boolean addMovieAndMovieRequest(int cinemaId, Movie movie, String message) {
+        String sqlMovie = "INSERT INTO Movie (name, description, poster, trailer, releasedate, country, director, agerestricted, actors, duration, status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sqlRequest = "INSERT INTO MovieRequest (cinemaId, movieId, status, message) VALUES (?, ?, ?, ?)";
+
+        try {
+            // Thêm movie vào bảng Movie
+            try (PreparedStatement psMovie = connection.prepareStatement(sqlMovie, Statement.RETURN_GENERATED_KEYS)) {
+                psMovie.setString(1, movie.getName());
+                psMovie.setString(2, movie.getDescription());
+                psMovie.setString(3, movie.getPoster());
+                psMovie.setString(4, movie.getTrailer());
+                psMovie.setDate(5, new java.sql.Date(movie.getReleaseDate().getTime()));
+                psMovie.setString(6, movie.getCountry());
+                psMovie.setString(7, movie.getDirector());
+                psMovie.setInt(8, movie.getAgeRestricted());
+                psMovie.setString(9, movie.getActors());
+                psMovie.setInt(10, movie.getDuration());
+                psMovie.setInt(11, 3); // Đặt status là 3
+
+                int rowsAffected = psMovie.executeUpdate();
+
+                // Lấy movieId của phim vừa thêm
+                if (rowsAffected > 0) {
+                    try (ResultSet generatedKeys = psMovie.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            int movieId = generatedKeys.getInt(1); // Lấy movieId tự động sinh
+
+                            // Thêm thông tin vào bảng MovieRequest
+                            try (PreparedStatement psRequest = connection.prepareStatement(sqlRequest)) {
+                                psRequest.setInt(1, cinemaId);
+                                psRequest.setInt(2, movieId);
+                                psRequest.setInt(3, 0); // Đặt status là 0 (Pending)
+                                psRequest.setString(4, message);
+
+                                psRequest.executeUpdate();
+                            }
+
+                            // Thêm genres vào bảng MovieGenre
+                            addMovieGenres(movieId, movie.getGenres()); // Gọi phương thức để thêm genres
+
+                            return true; // Thành công
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // Thất bại
+    }
+
+    public boolean deleteMovieRequest(int requestId) {
+        String sql = "DELETE FROM MovieRequest WHERE requestId = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0; // Trả về true nếu xóa thành công
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Trả về false nếu có lỗi
+        }
+    }
+
+    public List<MovieRequest> getAllMovieRequestByCinemaId(int cinemaId) {
+        List<MovieRequest> movieRequests = new ArrayList<>();
+        String sql = "SELECT requestId, cinemaId, movieId, status, message, timestamp " +
+                "FROM MovieRequest " +
+                "WHERE cinemaId = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, cinemaId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int requestId = resultSet.getInt("requestId");
+                    int movieId = resultSet.getInt("movieId");
+                    int status = resultSet.getInt("status");
+                    String message = resultSet.getString("message");
+                    Date timestamp = resultSet.getDate("timestamp");
+
+                    // Tạo đối tượng MovieRequest và thêm vào danh sách
+                    MovieRequest movieRequest = new MovieRequest(requestId, cinemaId, movieId, status, message, timestamp);
+                    movieRequests.add(movieRequest);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return movieRequests;
+    }
+    public List<Movie> getAllMovieListByCinemaId(int cinemaId) {
+        List<Movie> pendingMovies = new ArrayList<>();
+        String sql = """
+        SELECT m.movieId, m.name, m.description, m.poster, m.trailer, m.releasedate,
+               m.country, m.director, m.agerestricted, m.actors, m.duration, m.status
+        FROM Movie m
+        JOIN PendingMovies pm ON m.movieId = pm.movieId
+        WHERE pm.cinemaId = ? AND m.status = 3
+    """;
+
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            // Using the connection from DBContext
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, cinemaId);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int movieId = resultSet.getInt("movieId");
+                String name = resultSet.getString("name");
+                String description = resultSet.getString("description");
+                String poster = resultSet.getString("poster");
+                String trailer = resultSet.getString("trailer");
+                Date releaseDate = resultSet.getDate("releasedate");
+                String country = resultSet.getString("country");
+                String director = resultSet.getString("director");
+                int ageRestricted = resultSet.getInt("agerestricted");
+                String actors = resultSet.getString("actors");
+                int duration = resultSet.getInt("duration");
+                int status = resultSet.getInt("status");
+
+                // Create a new Movie object and add it to the list
+                Movie movie = new Movie(movieId, name, description, poster, trailer, releaseDate, country, director, ageRestricted, actors, duration, status, new ArrayList<>());
+                pendingMovies.add(movie);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (statement != null) statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return pendingMovies;
+    }
     public boolean updateMovie(Movie movie) {
         String updateSql = "UPDATE Movie SET name = ?, description = ?, poster = ?, trailer = ?, releasedate = ?, country = ?, director = ?, agerestricted = ?, actors = ?, duration = ?, status = ? WHERE movieId = ?";
         String deleteGenresSql = "DELETE FROM MovieGenre WHERE movieId = ?";
@@ -309,7 +529,6 @@ public class MovieDAO extends DBContext {
             return false;
         }
     }
-
 //    public boolean deleteMovie(int movieId) {
 //        String sql = "DELETE FROM Movie WHERE movieId = ?";
 //
@@ -472,7 +691,6 @@ public boolean deleteMovie(int movieId) {
             return false;
         }
     }
-
     public ArrayList<Map<String, Object>> getTicketSoldAndTotalCost(int cinemaId) {
         ArrayList<Map<String, Object>> movieRevenues = new ArrayList<>();
         String sql = "SELECT m.movieId, m.name, COUNT(t.ticketId) AS ticketSold, SUM(t.price) AS totalRevenue " +
@@ -504,7 +722,6 @@ public boolean deleteMovie(int movieId) {
 
         return movieRevenues;
     }
-
     // Xóa liên kết Movie-Genre
     public boolean deleteMovieGenres(int movieId) {
         String sql = "DELETE FROM MovieGenre WHERE movieId = ?";
@@ -518,46 +735,204 @@ public boolean deleteMovie(int movieId) {
             return false;
         }
     }
-    // Test method
-    public static void main(String[] args) {
-//        MovieDAO movieDAO = new MovieDAO();
-//        // Tạo một danh sách thể loại (genres)
-//        List<Genre> genres = new ArrayList<>();
-//        genres.add(new Genre(3, null));  // Genre với genreId = 3, name = null
-//
-//        // Tạo một đối tượng Movie
-//        Movie movie = new Movie(
-//                12,  // movieId
-//                "Minh",  // name
-//                "This is a test movie",  // description
-//                "test_poster_url",  // poster
-//                "test_trailer_url",  // trailer
-//                new Date(2024, 9, 2),  // releaseDate (Month in Date is 0-based, so 9 means October)
-//                "VN",  // country
-//                "Test Director",  // director
-//                12,  // ageRestricted
-//                "Test Actor 1, Test Actor 2",  // actors
-//                120,  // duration
-//                1,  // status
-//                genres  // genres list
-//        );
-//        System.out.println(movieDAO.updateMovie(movie));
+    public boolean updateMovieRequest(MovieRequest movieRequest) {
+        // Cập nhật thông tin yêu cầu phim
+        String updateRequestSql = "UPDATE MovieRequest SET status = ?, message = ? WHERE requestId = ?";
 
-        // In ra thông tin của đối tượng Movie
+        // Cập nhật thông tin phim
+        String updateMovieSql = "UPDATE Movie SET name = ?, description = ?, poster = ?, trailer = ?, releasedate = ?, country = ?, director = ?, agerestricted = ?, actors = ?, duration = ?, status = ? WHERE movieId = ?";
 
-        MovieDAO movieDAO = new MovieDAO();
-//        for(Movie movie : movieDAO.getTop5MostWatchedMoviesByCinemaId(1)) {
-//            System.out.println(movie.getName());
-//        }
-        ArrayList<Map<String, Object>> result = movieDAO.getTicketSoldAndTotalCost(2);
-        for (Map<String, Object> movieData : result) {
-            System.out.println("Movie ID: " + movieData.get("movieId"));
-            System.out.println("Movie Name: " + movieData.get("movieName"));
-            System.out.println("Tickets Sold: " + movieData.get("ticketSold"));
-            System.out.println("Total Revenue: " + movieData.get("totalRevenue"));
-            System.out.println("----------------------------");
+        try {
+            // Cập nhật yêu cầu phim
+            try (PreparedStatement psRequest = connection.prepareStatement(updateRequestSql)) {
+                psRequest.setInt(1, movieRequest.getStatus());
+                psRequest.setString(2, movieRequest.getMessage());
+                psRequest.setInt(3, movieRequest.getRequestId());
+
+                int rowsAffectedRequest = psRequest.executeUpdate();
+
+                // Cập nhật phim tương ứng
+                // Lấy movieId từ movieRequest để cập nhật thông tin phim
+                Movie movie = getMovieById(movieRequest.getMovieId());
+
+                if (movie != null) {
+                    try (PreparedStatement psMovie = connection.prepareStatement(updateMovieSql)) {
+                        psMovie.setString(1, movie.getName());
+                        psMovie.setString(2, movie.getDescription());
+                        psMovie.setString(3, movie.getPoster());
+                        psMovie.setString(4, movie.getTrailer());
+                        psMovie.setDate(5, new java.sql.Date(movie.getReleaseDate().getTime()));
+                        psMovie.setString(6, movie.getCountry());
+                        psMovie.setString(7, movie.getDirector());
+                        psMovie.setInt(8, movie.getAgeRestricted());
+                        psMovie.setString(9, movie.getActors());
+                        psMovie.setInt(10, movie.getDuration());
+                        psMovie.setInt(11, movie.getStatus());
+                        psMovie.setInt(12, movie.getMovieId());
+
+                        int rowsAffectedMovie = psMovie.executeUpdate();
+
+                        // Cập nhật genres
+                        deleteMovieGenres(movie.getMovieId()); // Xóa genres cũ
+                        addMovieGenres(movie.getMovieId(), movie.getGenres()); // Thêm genres mới
+                    }
+                }
+
+                return rowsAffectedRequest > 0; // Trả về true nếu cập nhật yêu cầu thành công
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Trả về false nếu có lỗi
         }
     }
+
+    public List<Map<String, Object>> getAllPendingMovieRequestsWithMovies() {
+        List<Map<String, Object>> pendingRequestsWithMovies = new ArrayList<>();
+
+        String sql = """
+        SELECT mr.requestId, mr.cinemaId, mr.movieId, mr.status, mr.message, mr.timestamp,
+               m.name, m.description, m.poster, m.trailer, m.releasedate, m.country,
+               m.director, m.agerestricted, m.actors, m.duration, m.status AS movieStatus
+        FROM MovieRequest mr
+        JOIN Movie m ON mr.movieId = m.movieId
+        WHERE mr.status = 0
+    """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                // Lấy dữ liệu MovieRequest
+                MovieRequest movieRequest = new MovieRequest();
+                movieRequest.setRequestId(resultSet.getInt("requestId"));
+                movieRequest.setCinemaId(resultSet.getInt("cinemaId"));
+                movieRequest.setMovieId(resultSet.getInt("movieId"));
+                movieRequest.setStatus(resultSet.getInt("status"));
+                movieRequest.setMessage(resultSet.getString("message"));
+                movieRequest.setTimestamp(resultSet.getDate("timestamp"));
+
+                // Lấy dữ liệu Movie
+                Movie movie = new Movie();
+                movie.setMovieId(resultSet.getInt("movieId"));
+                movie.setName(resultSet.getString("name"));
+                movie.setDescription(resultSet.getString("description"));
+                movie.setPoster(resultSet.getString("poster"));
+                movie.setTrailer(resultSet.getString("trailer"));
+                movie.setReleaseDate(resultSet.getDate("releasedate"));
+                movie.setCountry(resultSet.getString("country"));
+                movie.setDirector(resultSet.getString("director"));
+                movie.setAgeRestricted(resultSet.getInt("agerestricted"));
+                movie.setActors(resultSet.getString("actors"));
+                movie.setDuration(resultSet.getInt("duration"));
+                movie.setStatus(resultSet.getInt("movieStatus"));
+
+                // Tạo một Map chứa cả MovieRequest và Movie
+                Map<String, Object> requestWithMovie = new HashMap<>();
+                requestWithMovie.put("movieRequest", movieRequest);
+                requestWithMovie.put("movie", movie);
+
+                pendingRequestsWithMovies.add(requestWithMovie);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
+        return pendingRequestsWithMovies;
+    }
+    public boolean acceptMovieRequest(int requestId, int movieId) {
+        String updateMovieRequestSql = "UPDATE MovieRequest SET status = 1 WHERE requestId = ?";
+        String updateMovieSql = "UPDATE Movie SET status = 2 WHERE movieId = ?";
+
+        try (PreparedStatement updateMovieRequestStmt = connection.prepareStatement(updateMovieRequestSql);
+             PreparedStatement updateMovieStmt = connection.prepareStatement(updateMovieSql)) {
+
+            // Cập nhật trạng thái của MovieRequest thành 1 (chấp nhận)
+            updateMovieRequestStmt.setInt(1, requestId);
+            int rowsAffectedRequest = updateMovieRequestStmt.executeUpdate();
+
+            // Cập nhật trạng thái của Movie thành 2 (hoạt động)
+            updateMovieStmt.setInt(1, movieId);
+            int rowsAffectedMovie = updateMovieStmt.executeUpdate();
+
+            // Trả về true nếu cả hai cập nhật đều thành công
+            return rowsAffectedRequest > 0 && rowsAffectedMovie > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean rejectMovieRequest(int requestId, int movieId) {
+        String updateMovieRequestSql = "UPDATE MovieRequest SET status = 2 WHERE requestId = ?";
+        String deleteMovieGenreSql = "DELETE FROM MovieGenre WHERE movieId = ?";
+        String deleteMovieSql = "DELETE FROM Movie WHERE movieId = ?";
+
+        try (PreparedStatement updateMovieRequestStmt = connection.prepareStatement(updateMovieRequestSql);
+             PreparedStatement deleteMovieGenreStmt = connection.prepareStatement(deleteMovieGenreSql);
+             PreparedStatement deleteMovieStmt = connection.prepareStatement(deleteMovieSql)) {
+
+            // Cập nhật trạng thái của MovieRequest thành 2 (từ chối)
+            updateMovieRequestStmt.setInt(1, requestId);
+            int rowsAffectedRequest = updateMovieRequestStmt.executeUpdate();
+
+            // Xóa các bản ghi liên quan trong MovieGenre
+            deleteMovieGenreStmt.setInt(1, movieId);
+            deleteMovieGenreStmt.executeUpdate();
+
+            // Xóa Movie khỏi cơ sở dữ liệu
+            deleteMovieStmt.setInt(1, movieId);
+            int rowsAffectedMovie = deleteMovieStmt.executeUpdate();
+
+            // Trả về true nếu cả hai cập nhật đều thành công
+            return rowsAffectedRequest > 0 && rowsAffectedMovie > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+    // Test method
+    public static void main(String[] args) {
+        MovieDAO movieDAO = new MovieDAO();
+
+        // Gọi phương thức getAllPendingMovieRequestsWithMovies
+        List<Map<String, Object>> pendingRequestsWithMovies = movieDAO.getAllPendingMovieRequestsWithMovies();
+
+        // Kiểm tra và in ra kết quả
+        if (pendingRequestsWithMovies.isEmpty()) {
+            System.out.println("No pending movie requests with movies found.");
+        } else {
+            System.out.println("Pending Movie Requests with Movies:");
+            for (Map<String, Object> requestWithMovie : pendingRequestsWithMovies) {
+                MovieRequest movieRequest = (MovieRequest) requestWithMovie.get("movieRequest");
+                Movie movie = (Movie) requestWithMovie.get("movie");
+
+                System.out.println("Request ID: " + movieRequest.getRequestId());
+                System.out.println("Cinema ID: " + movieRequest.getCinemaId());
+                System.out.println("Movie ID: " + movieRequest.getMovieId());
+                System.out.println("Request Status: " + movieRequest.getStatus());
+                System.out.println("Message: " + movieRequest.getMessage());
+                System.out.println("Timestamp: " + movieRequest.getTimestamp());
+
+                System.out.println("Movie Name: " + movie.getName());
+                System.out.println("Description: " + movie.getDescription());
+                System.out.println("Poster: " + movie.getPoster());
+                System.out.println("Trailer: " + movie.getTrailer());
+                System.out.println("Release Date: " + movie.getReleaseDate());
+                System.out.println("Country: " + movie.getCountry());
+                System.out.println("Director: " + movie.getDirector());
+                System.out.println("Age Restricted: " + movie.getAgeRestricted());
+                System.out.println("Actors: " + movie.getActors());
+                System.out.println("Duration: " + movie.getDuration());
+                System.out.println("Movie Status: " + movie.getStatus());
+                System.out.println("----------------------------");
+            }
+        }
+    }
+}
 
 

@@ -50,7 +50,7 @@ public class JwtUtil {
 
     public static void main(String[] args) {
         // Test case: Generating a token
-        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnaWFuZ3F0Mms0QGdtYWlsLmNvbSIsImlhdCI6MTcyOTkzNjIwNywiZXhwIjoxNzI5OTM4MTI3fQ.vkOeloe2b7s9dn35bBZjQWND3F1BSduXH1sa2dFpgnE";
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaW5odGNkZTE4MDkyMEBmcHQuZWR1LnZuIiwiaWF0IjoxNzMwMTIwMzc5LCJleHAiOjE3MzAxMjM5Nzl9.P-wQ3Z7HtBEo5DrS3y6xA9_XfhSDSfiMlFCAgDzeWx0";
         // Test case: Validating the token
         Claims claims = JwtUtil.validateToken(token);
         if (claims != null) {
