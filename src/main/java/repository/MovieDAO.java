@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package repository;
 
 import context.DBContext;
@@ -10,7 +6,6 @@ import model.Movie;
 import model.MovieRequest;
 
 import java.sql.*;
-import java.text.SimpleDateFormat;
 
 import java.util.*;
 import java.util.Date;
@@ -116,7 +111,7 @@ public class MovieDAO extends DBContext {
     }
     public List<Movie> getAllMovieList() {
         List<Movie> allMovies = new ArrayList<>();
-        String sql = "SELECT * FROM Movie";
+        String sql = "SELECT * FROM Movie WHERE status != 3";
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {

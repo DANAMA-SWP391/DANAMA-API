@@ -10,14 +10,18 @@ import model.Booking;
 import model.BookingDetail;
 import model.Ticket;
 import repository.BookingDAO;
-import repository.TicketDAO;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @WebServlet(name = "BookingController", value = "/booking")
 public class BookingController extends HttpServlet {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -62,7 +66,10 @@ public class BookingController extends HttpServlet {
         // Attempt to add booking with tickets
         boolean success = bookingDAO.addBookingWithTickets(booking, tickets);
         if (success) {
-            responseData.addProperty("bookingId", booking.getBookingId());
+            int bookingId = booking.getBookingId();
+            responseData.addProperty("bookingId", bookingId);
+            // Schedule task to delete booking if not paid within 5 minutes
+            scheduler.schedule(() -> expireBookingIfUnpaid(bookingId), 5, TimeUnit.MINUTES);
         } else {
             responseData.addProperty("error", "Some seats are already booked. Booking failed.");
         }
@@ -71,6 +78,15 @@ public class BookingController extends HttpServlet {
         String json = gson.toJson(responseData);
         response.getWriter().write(json);
         response.getWriter().flush();
+    }
+    // Method to delete the booking if it remains unpaid
+    private void expireBookingIfUnpaid(int bookingId) {
+        BookingDAO bookingDAO = new BookingDAO();
+        // Check if booking is still pending and delete if needed
+        if (bookingDAO.isBookingPending(bookingId)) {
+            bookingDAO.deleteBookingWithTickets(bookingId);
+            System.out.println("Booking " + bookingId + " has been deleted due to expiration.");
+        }
     }
 
 }

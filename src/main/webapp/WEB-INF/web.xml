@@ -21,9 +21,6 @@
         <url-pattern>/managerDashBoard</url-pattern>
     </servlet-mapping>
     <listener>
-        <listener-class>listener.BookingCleanupListener</listener-class>
-    </listener>
-    <listener>
         <listener-class>listener.ShowtimeCleanupListener</listener-class>
     </listener>
     <listener>

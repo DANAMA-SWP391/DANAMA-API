@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <title>Thank You</title>
     <style>
+        @font-face {
+            font-family: 'Mogra';
+            src: url('../assets/Mogra-Regular.ttf') format('truetype');
+        }
         /* Reset and universal styles */
         * {
             margin: 0;

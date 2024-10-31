@@ -89,6 +89,8 @@ CREATE TABLE Room
         CONSTRAINT PK_Room_roomId PRIMARY KEY IDENTITY (1,1),
     [name]   NVARCHAR(255),
     cinemaId INT,
+    numberOfRows INT,
+    numberOfColumns INT,
     CONSTRAINT FK_Room_Cinema_cinemaId FOREIGN KEY (cinemaId) REFERENCES Cinema (cinemaId)
 );
 
