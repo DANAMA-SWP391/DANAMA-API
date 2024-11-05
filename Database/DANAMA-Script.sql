@@ -85,11 +85,11 @@ CREATE TABLE Cinema
 -- Create Room Table
 CREATE TABLE Room
 (
-    roomId   INT
+    roomId          INT
         CONSTRAINT PK_Room_roomId PRIMARY KEY IDENTITY (1,1),
-    [name]   NVARCHAR(255),
-    cinemaId INT,
-    numberOfRows INT,
+    [name]          NVARCHAR(255),
+    cinemaId        INT,
+    numberOfRows    INT,
     numberOfColumns INT,
     CONSTRAINT FK_Room_Cinema_cinemaId FOREIGN KEY (cinemaId) REFERENCES Cinema (cinemaId)
 );
@@ -154,16 +154,17 @@ CREATE TABLE Ticket
     CONSTRAINT FK_Ticket_Seat_seatId FOREIGN KEY (seatId) REFERENCES Seat (seatId)
 );
 
--- Create MovieRequest Table without ON DELETE CASCADE and allowing movieId to be NULL
-CREATE TABLE MovieRequest (
-                              requestId INT PRIMARY KEY IDENTITY (1,1),
-                              cinemaId INT NOT NULL,
-                              movieId INT NULL, -- Allow NULL for movieId to keep MovieRequest when Movie is deleted
-                              status TINYINT NOT NULL, -- Status of the request: 0 = pending, 1 = approved, 2 = rejected
-                              message VARCHAR(255), -- Message from the cinema manager
-                              timestamp DATETIME DEFAULT GETDATE(), -- Request creation time
-                              FOREIGN KEY (cinemaId) REFERENCES Cinema (cinemaId),
-                              FOREIGN KEY (movieId) REFERENCES Movie (movieId) ON DELETE SET NULL -- Set to NULL instead of delete
+--Create MovieRequest Table
+CREATE TABLE MovieRequest
+(
+    requestId INT PRIMARY KEY IDENTITY (1,1),
+    cinemaId  INT     NOT NULL,
+    movieId   INT     NULL,
+    status    TINYINT NOT NULL,
+    message   VARCHAR(255),
+    timestamp DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (cinemaId) REFERENCES Cinema (cinemaId),
+    FOREIGN KEY (movieId) REFERENCES Movie (movieId) ON DELETE SET NULL
 );
 
 
