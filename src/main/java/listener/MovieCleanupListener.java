@@ -15,7 +15,7 @@ public class MovieCleanupListener implements ServletContextListener {
         scheduler = Executors.newSingleThreadScheduledExecutor();
 
         // Schedule the MovieCleanupTask to run every 24 hours
-        scheduler.scheduleAtFixedRate(new MovieCleanupTask(), 0, 12, TimeUnit.HOURS); // Runs daily
+        scheduler.scheduleAtFixedRate(new MovieCleanupTask(), 0, 24, TimeUnit.HOURS); // Runs daily
     }
 
     @Override
