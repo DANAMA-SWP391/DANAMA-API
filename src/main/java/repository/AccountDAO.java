@@ -394,6 +394,31 @@ public class AccountDAO extends DBContext {
         return accounts;
     }
 
+    public ArrayList<Account> getManagersWithoutCinema() {
+        ArrayList<Account> managersWithoutCinema = new ArrayList<>();
+        String sql = "SELECT UID, email " +
+                "FROM Account " +
+                "WHERE roleId = ? AND UID NOT IN (SELECT managerId FROM Cinema WHERE managerId IS NOT NULL)";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            // Assuming '2' is the roleId for managers; change this value as necessary
+            ps.setInt(1, 2);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Account account = new Account();
+                account.setUID(rs.getInt("UID"));
+                account.setEmail(rs.getString("email"));
+                managersWithoutCinema.add(account);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return managersWithoutCinema;
+    }
+
     public static void main(String[] args) {
         AccountDAO accountDAO = new AccountDAO();
 //
