@@ -20,11 +20,11 @@
         <servlet-name>ManagerDashBoardController</servlet-name>
         <url-pattern>/managerDashBoard</url-pattern>
     </servlet-mapping>
-    <listener>
-        <listener-class>listener.ShowtimeCleanupListener</listener-class>
-    </listener>
-    <listener>
-        <listener-class>listener.MovieCleanupListener</listener-class>
-    </listener>
+<!--    <listener>-->
+<!--        <listener-class>listener.ShowtimeCleanupListener</listener-class>-->
+<!--    </listener>-->
+<!--    <listener>-->
+<!--        <listener-class>listener.MovieCleanupListener</listener-class>-->
+<!--    </listener>-->
 
 </web-app>
